@@ -4,8 +4,16 @@ _Last updated: 2026-09-16_
 
 ## Where we are
 
-Design phase complete. **Zero code written.** Next action is to scaffold the app and build the
-Phase 1 intake screens.
+Phase 1 scaffold is built and running. App shell (React + Vite + TS + Tailwind), Supabase project
+live (`Creator OS`, ap-south-1, project ref `ljfiqwuidwilfoxqvtqx`), schema applied. Screens wired
+to real data: **Library** (also the Voice Training intake — paste a transcript + metrics, it saves
+to the `reels` table), **Watchlist**, **Sources**, **Brand Brain**, **Settings**. Verified working
+end-to-end in the browser (add/read confirmed against the live database).
+
+Not built yet: Today, Ideas, Studio, Board, Formats, Performance, Employees — each shows a "later"
+placeholder naming which phase it belongs to.
+
+**Not yet on GitHub** — waiting on a private repo to be created, see bottom of this file.
 
 ## Settled decisions
 
@@ -42,12 +50,14 @@ Phase 1 intake screens.
    deals later; the Brand Brain needs a register setting and he has to choose where it sits.
 4. **API keys created** (console.anthropic.com and aistudio.google.com).
 
-## Not blocked — can start now
+## Not blocked — done
 
-Phase 1 scaffolding does not need any of the above. Build order is in `docs/01-architecture.md`.
+Phase 1 scaffolding is done (see "Where we are" above).
 
-**Next concrete action:** scaffold the Vite + React + TS + Tailwind app, set up Supabase, and
-build the `reels` (Library) table plus the Voice Training intake screen.
+**Next concrete action:** create a private GitHub repo named `creator-os` at github.com/new (no
+README), then push this repo to it. After that: keep using the Library screen to paste in more
+past reels (25–30 total is the target for a real voice profile), and revisit the 4 blocked
+questions above when ready.
 
 ## Build phases
 
