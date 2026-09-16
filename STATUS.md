@@ -50,11 +50,20 @@ can read every transcript and strategy note, and can wipe the database.
 
 Harmless right now because nothing is deployed. **It is a hard blocker on deploying.**
 
-Fix written but deliberately NOT applied: `supabase/migrations/0003_enable_rls.sql`. It must land
-together with Supabase Auth and a login screen — applied alone it blanks every screen, because the
-anon key loses access and there is no signed-in session to take its place.
+**Auth is now built** (2026-09-16): `src/lib/auth.tsx` (AuthProvider + useAuth),
+`src/pages/Login.tsx` (email + password, no public sign-up), a gate in `App.tsx` that shows the
+login screen when there is no session, and a sign-out control in the sidebar. Build passes.
 
-**Do not deploy to Vercel until 0003 plus a login screen are both in.**
+`supabase/migrations/0003_enable_rls.sql` is still **NOT applied** — deliberately. Correct order,
+so Adarsh is never locked out:
+1. Create his user: Supabase dashboard → Authentication → Users → Add user (he sets the password).
+2. Run the app, sign in, confirm the screens still load.
+3. **Then** paste 0003 into the Supabase SQL editor.
+
+If anything goes wrong, the Supabase dashboard table editor bypasses RLS, so the data is never
+unreachable.
+
+**Do not deploy to Vercel until 0003 has been applied and login verified.**
 
 ## Database is now seeded (2026-09-16)
 

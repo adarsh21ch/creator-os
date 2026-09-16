@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { supabaseConfigured } from '../lib/supabase'
+import { supabase, supabaseConfigured } from '../lib/supabase'
+import { useAuth } from '../lib/auth'
 
 type NavItem = { to: string; label: string; phase1: boolean }
 type NavGroup = { title: string; items: NavItem[] }
@@ -40,6 +41,8 @@ const groups: NavGroup[] = [
 ]
 
 export function Layout() {
+  const { session } = useAuth()
+
   return (
     <div className="flex min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
       <aside className="w-56 shrink-0 border-r border-neutral-200 p-4 dark:border-neutral-800">
@@ -79,6 +82,18 @@ export function Layout() {
             </div>
           ))}
         </nav>
+        {session && (
+          <div className="mt-6 border-t border-neutral-200 pt-3 dark:border-neutral-800">
+            <div className="truncate px-2 text-[11px] text-neutral-500">{session.user.email}</div>
+            <button
+              type="button"
+              onClick={() => supabase.auth.signOut()}
+              className="mt-1 w-full rounded-md px-2 py-1.5 text-left text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-900"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
         {!supabaseConfigured && (
           <div className="mt-6 rounded-md border border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
             Supabase not connected. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env
