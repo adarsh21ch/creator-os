@@ -13,7 +13,7 @@ const supabase = createClient(
 );
 
 const APIFY_TOKEN = Deno.env.get("APIFY_API_TOKEN");
-const APIFY_ACTOR = "apify~instagram-reel-scraper";
+const APIFY_ACTOR = "apify~instagram-scraper";
 
 type Body = {
   url: string;
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ directUrls: [body.url] }),
+      body: JSON.stringify({ directUrls: [body.url], resultsType: "posts", resultsLimit: 1 }),
     },
   );
 
