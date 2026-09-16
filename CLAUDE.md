@@ -87,6 +87,12 @@ Influencer Watch desk rather than writing it twice.
 - Edit this repo directly in Claude Code (the Lovable-prompt rule does NOT apply to this project).
 - Do not push to GitHub without asking — this repo contains his political content and strategy.
 
+## Known security issue
+
+RLS is disabled on all 8 tables and the anon key is public (it ships in the client bundle).
+`supabase/migrations/0003_enable_rls.sql` is the fix, written but **not applied** — it needs
+Supabase Auth and a login screen landing at the same time. **Do not deploy before both are in.**
+
 ## Where to start
 
 Read `STATUS.md`. It says exactly what is done, what is blocked, and what the next action is.

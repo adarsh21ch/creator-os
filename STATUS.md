@@ -41,6 +41,34 @@ placeholder naming which phase it belongs to.
 - **Confound:** 2 of the 3 losers were paid promotions, so part of the gap may be cold
   distribution. l03 is organic and fits both formats, which is what keeps them standing.
 
+## SECURITY BLOCKER — must be fixed before any deploy
+
+**Verified 2026-09-16: RLS is disabled on all 8 tables.** `VITE_SUPABASE_ANON_KEY` ships inside
+the client JS bundle, so it is public by definition. An anon `DELETE` against `reels` returned
+**HTTP 204** — meaning once this app is live at creator.nevorai.com, anyone who opens the page
+can read every transcript and strategy note, and can wipe the database.
+
+Harmless right now because nothing is deployed. **It is a hard blocker on deploying.**
+
+Fix written but deliberately NOT applied: `supabase/migrations/0003_enable_rls.sql`. It must land
+together with Supabase Auth and a login screen — applied alone it blanks every screen, because the
+anon key loses access and there is no signed-in session to take its place.
+
+**Do not deploy to Vercel until 0003 plus a login screen are both in.**
+
+## Database is now seeded (2026-09-16)
+
+- `reels`: **7 rows** — the 4 winners and 3 losers, with `is_organic` set correctly (l01 and l02
+  flagged as paid promotions). **Metrics left NULL on purpose** — exact figures were never
+  supplied and inventing them would poison the exact analysis this table exists for. Adarsh
+  filling real numbers in the Library screen is a 5-minute job that meaningfully strengthens
+  F-01 and F-02.
+- `brand_brain`: seeded with the 5 pillars, his hook formula, and the full voice profile —
+  including the warning that beats 1 and 5 appear in losers too and are voice, not cause.
+  `language_register` deliberately left NULL: that is his decision.
+- Everything else still empty: `watchlist_accounts`, `sources`, `employees`, `news_stories`,
+  `watchlist_posts`.
+
 ## Blocked on Adarsh
 
 1. **3–5 more ORGANIC losers.** The validation step for F-01 and F-02. Organic only — promoted
@@ -54,10 +82,16 @@ placeholder naming which phase it belongs to.
 
 Phase 1 scaffolding is done (see "Where we are" above).
 
-**Next concrete action:** create a private GitHub repo named `creator-os` at github.com/new (no
-README), then push this repo to it. After that: keep using the Library screen to paste in more
-past reels (25–30 total is the target for a real voice profile), and revisit the 4 blocked
-questions above when ready.
+**Next concrete action — pick one:**
+1. **Auth + RLS** (unblocks deploying). Supabase Auth, a login screen, apply migration 0003.
+   Nothing can go live until this is done.
+2. **Studio screen** (the first screen that gives him daily value) — Hook Writer + Scriptwriter
+   reading the seeded Brand Brain. Needs an Anthropic or Gemini key in `.env`; none is set yet.
+3. **Keep loading the archive** — his job, not a build task. 25-30 reels is the target for a real
+   voice profile; 7 are in.
+
+`gh` CLI is not installed on this machine, so the GitHub push needs him to create the private repo
+manually at github.com/new (named `creator-os`, no README) and then `git remote add` + push.
 
 ## Build phases
 
