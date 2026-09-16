@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Source } from '../types'
+import type { NewsStory, Source } from '../types'
 
 export function SourcesPage() {
   const qc = useQueryClient()
@@ -18,6 +18,19 @@ export function SourcesPage() {
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Source[]
+    },
+  })
+
+  const { data: stories } = useQuery({
+    queryKey: ['news_stories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('news_stories')
+        .select('*')
+        .order('fetched_at', { ascending: false })
+        .limit(30)
+      if (error) throw error
+      return data as NewsStory[]
     },
   })
 
@@ -97,6 +110,30 @@ export function SourcesPage() {
               <span className="rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-500 dark:bg-neutral-900">
                 {s.type}
               </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mb-2 mt-10 text-sm font-semibold text-neutral-500">
+        Latest headlines (pulled nightly at 2am)
+      </h2>
+      {stories && stories.length === 0 && (
+        <p className="text-sm text-neutral-500">
+          Nothing pulled yet — the nightly job runs at 2am IST, or add a source above and check
+          back tomorrow.
+        </p>
+      )}
+      {stories && stories.length > 0 && (
+        <ul className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 text-sm dark:divide-neutral-800 dark:border-neutral-800">
+          {stories.map((s) => (
+            <li key={s.id} className="p-3">
+              <a href={s.url} target="_blank" rel="noreferrer" className="font-medium hover:underline">
+                {s.title}
+              </a>
+              <div className="text-xs text-neutral-500">
+                {s.published_at ? new Date(s.published_at).toLocaleDateString() : '—'}
+              </div>
             </li>
           ))}
         </ul>

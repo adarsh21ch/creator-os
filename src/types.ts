@@ -48,6 +48,29 @@ export type BrandBrain = {
   updated_at: string
 }
 
+export type NewsStory = {
+  id: string
+  source_id: string | null
+  title: string
+  url: string
+  summary: string | null
+  published_at: string | null
+  fetched_at: string
+}
+
+export type WatchlistPost = {
+  id: string
+  account_id: string
+  post_url: string
+  posted_at: string | null
+  caption: string | null
+  transcript: string | null
+  views: number | null
+  likes: number | null
+  comments: number | null
+  fetched_at: string
+}
+
 export type AppSettingsRow = {
   id: 1
   instagram_connected: boolean

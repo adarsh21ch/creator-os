@@ -27,10 +27,43 @@ function toIntOrNull(v: string) {
   return v.trim() === '' ? null : Number.parseInt(v, 10)
 }
 
+function engagementRate(r: Reel) {
+  if (!r.views) return null
+  return (((r.likes ?? 0) + (r.comments ?? 0)) / r.views) * 100
+}
+
+function followRate(r: Reel) {
+  if (!r.views) return null
+  return ((r.follows ?? 0) / r.views) * 100
+}
+
+function saveRate(r: Reel) {
+  if (!r.views) return null
+  return ((r.saves ?? 0) / r.views) * 100
+}
+
 export function LibraryPage() {
   const qc = useQueryClient()
   const [form, setForm] = useState(emptyForm)
   const [open, setOpen] = useState(false)
+  const [igUrl, setIgUrl] = useState('')
+  const [igStatus, setIgStatus] = useState<string | null>(null)
+
+  const ingestLink = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('ingest-instagram', {
+        body: { url: igUrl, kind: 'own' },
+      })
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['reels'] })
+      setIgUrl('')
+      setIgStatus('Added.')
+    },
+    onError: (e: Error) => setIgStatus(e.message),
+  })
 
   const { data: reels, isLoading } = useQuery({
     queryKey: ['reels'],
@@ -91,6 +124,29 @@ export function LibraryPage() {
           {open ? 'Close' : '+ Add reel'}
         </button>
       </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (igUrl.trim()) ingestLink.mutate()
+        }}
+        className="mb-6 flex gap-2"
+      >
+        <input
+          placeholder="Paste an Instagram reel link — auto-fetches views/likes/comments via Apify"
+          value={igUrl}
+          onChange={(e) => setIgUrl(e.target.value)}
+          className="flex-1 rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+        />
+        <button
+          type="submit"
+          disabled={ingestLink.isPending}
+          className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium hover:bg-neutral-100 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+        >
+          {ingestLink.isPending ? 'Fetching…' : 'Auto-fetch'}
+        </button>
+      </form>
+      {igStatus && <p className="-mt-4 mb-4 text-xs text-neutral-500">{igStatus}</p>}
 
       {open && (
         <form
@@ -194,8 +250,13 @@ export function LibraryPage() {
                 <th className="p-2">Date</th>
                 <th className="p-2">Pillar</th>
                 <th className="p-2">Views</th>
-                <th className="p-2">Follows</th>
+                <th className="p-2">Likes</th>
+                <th className="p-2">Comments</th>
                 <th className="p-2">Saves</th>
+                <th className="p-2">Follows</th>
+                <th className="p-2">Engagement %</th>
+                <th className="p-2">Save %</th>
+                <th className="p-2">Follow %</th>
                 <th className="p-2">Organic</th>
               </tr>
             </thead>
@@ -205,8 +266,13 @@ export function LibraryPage() {
                   <td className="p-2">{r.posted_at ?? '—'}</td>
                   <td className="p-2">{r.pillar ?? '—'}</td>
                   <td className="p-2">{r.views ?? '—'}</td>
-                  <td className="p-2">{r.follows ?? '—'}</td>
+                  <td className="p-2">{r.likes ?? '—'}</td>
+                  <td className="p-2">{r.comments ?? '—'}</td>
                   <td className="p-2">{r.saves ?? '—'}</td>
+                  <td className="p-2">{r.follows ?? '—'}</td>
+                  <td className="p-2">{engagementRate(r)?.toFixed(2) ?? '—'}</td>
+                  <td className="p-2">{saveRate(r)?.toFixed(2) ?? '—'}</td>
+                  <td className="p-2">{followRate(r)?.toFixed(2) ?? '—'}</td>
                   <td className="p-2">{r.is_organic ? 'Yes' : 'Paid'}</td>
                 </tr>
               ))}
