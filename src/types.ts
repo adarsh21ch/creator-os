@@ -1,0 +1,70 @@
+export type Reel = {
+  id: string
+  posted_at: string | null
+  transcript: string
+  caption: string | null
+  pillar: string | null
+  hook_type: string | null
+  length_seconds: number | null
+  format_id: string | null
+  is_organic: boolean
+  views: number | null
+  likes: number | null
+  comments: number | null
+  shares: number | null
+  saves: number | null
+  profile_visits: number | null
+  follows: number | null
+  source: 'voice_training' | 'graph_api' | 'manual'
+  notes: string | null
+  created_at: string
+}
+
+export type WatchlistAccount = {
+  id: string
+  handle: string
+  wing: 'right' | 'left' | 'neutral' | null
+  notes: string | null
+  active: boolean
+  created_at: string
+}
+
+export type Source = {
+  id: string
+  name: string
+  url: string
+  type: 'rss' | 'newspaper' | 'other'
+  active: boolean
+  created_at: string
+}
+
+export type BrandBrain = {
+  id: 1
+  pillars: string[]
+  hook_formula: string | null
+  voice_notes: string | null
+  banned_claims: string | null
+  language_register: 'clean' | 'mixed' | 'crude' | null
+  updated_at: string
+}
+
+export type AppSettingsRow = {
+  id: 1
+  instagram_connected: boolean
+  anthropic_key_set: boolean
+  gemini_key_set: boolean
+  updated_at: string
+}
+
+export type Employee = {
+  id: string
+  code: string
+  name: string
+  desk: 'intelligence' | 'creative' | 'production' | 'performance' | 'manager'
+  prompt: string | null
+  provider: 'anthropic' | 'gemini'
+  model: string | null
+  schedule: string | null
+  enabled: boolean
+  created_at: string
+}

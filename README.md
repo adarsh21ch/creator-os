@@ -5,11 +5,19 @@ Instagram content: finds topics, writes hooks and scripts in his own voice, trac
 accounts, tears winning reels apart into reusable formats, and measures what actually builds an
 audience.
 
-**Status:** design complete, no code yet. Target domain `creator.nevorai.com`.
+**Status:** Phase 1 in progress. Target domain `creator.nevorai.com`.
 
 Start with [CLAUDE.md](CLAUDE.md), then [STATUS.md](STATUS.md).
 
 ```
 docs/     design, decisions, voice profile, formats, pillars, screens
 data/     his source material — reel transcripts
+src/      the app (React + Vite + TS + Tailwind + Supabase)
+```
+
+## Dev
+
+```
+bun install
+bun dev
 ```
