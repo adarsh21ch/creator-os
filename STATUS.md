@@ -20,14 +20,26 @@ Phase 1 intake screens.
 | Stack | React + Vite + TS + Tailwind, Supabase, Vercel |
 | Employees | 13 AI + 1 manager across 4 desks — see `docs/01-architecture.md` |
 
+## First real teardown — done 2026-09-16
+
+7 transcripts in hand (4 winners, 3 losers). Result in `docs/04-formats.md`:
+
+- **Both original hypotheses were killed.** The Counted Zero and Their Words Their Weapon both
+  appear in losing reels. They are voice markers, not causes. This is exactly the survivorship
+  bias the promotion rule exists to catch, and it caught it.
+- **Two formats promoted:** F-01 Named Living Villain (4/4 winners, 0/3 losers) and F-02 Stake On
+  The Viewer (4/4, 0/3). Winners aim at a living recognizable target and hand the viewer a
+  grievance; losers explain institutions, policy or history.
+- **Confound:** 2 of the 3 losers were paid promotions, so part of the gap may be cold
+  distribution. l03 is organic and fits both formats, which is what keeps them standing.
+
 ## Blocked on Adarsh
 
-1. **Metrics for the 4 transcripts in `data/transcripts/`.** Which performed best, which worst.
-   Without this nothing can be labelled winner vs loser and no Format can be promoted past a hunch.
-2. **3 reels that clearly flopped.** Needed to check patterns against losers — winners alone
-   produce survivorship bias, which is the exact failure mode the Pattern Analyst exists to avoid.
-3. **Language register decision.** Transcript 02 contains a crude Hindi word. He wants brand deals
-   later; the Brand Brain needs a register setting and he has to choose where it sits.
+1. **3–5 more ORGANIC losers.** The validation step for F-01 and F-02. Organic only — promoted
+   reels confound the comparison.
+2. **Which of the 4 winners was biggest.** Lets the formats be weighted rather than flat.
+3. **Language register decision.** Transcript w02 contains a crude Hindi word. He wants brand
+   deals later; the Brand Brain needs a register setting and he has to choose where it sits.
 4. **API keys created** (console.anthropic.com and aistudio.google.com).
 
 ## Not blocked — can start now
