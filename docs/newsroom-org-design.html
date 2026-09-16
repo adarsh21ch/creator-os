@@ -1,0 +1,741 @@
+<title>Creator OS Newsroom</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#EDF0EE;
+    --surface:#FAFBFA;
+    --surface-2:#E4E9E6;
+    --ink:#11191B;
+    --ink-2:#2C3A3C;
+    --muted:#5C6E70;
+    --hair:#C7D1CD;
+    --accent:#A9660A;
+    --accent-soft:#F2E3CE;
+    --teal:#125E60;
+    --teal-soft:#DCE9E8;
+    --ok:#2A6E4C;
+    --ok-soft:#D9EBE0;
+    --risk:#9E3527;
+    --risk-soft:#F3DFDB;
+    --shadow:0 1px 2px rgba(17,25,27,.06);
+    --f-display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+    --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0D1315;--surface:#151E20;--surface-2:#1E2A2C;--ink:#E7EEEC;--ink-2:#C3CFCD;
+      --muted:#8FA2A3;--hair:#2C3B3D;--accent:#EFA744;--accent-soft:#3A2A14;--teal:#5FBEB8;
+      --teal-soft:#14302F;--ok:#74CB99;--ok-soft:#153025;--risk:#EC8C79;--risk-soft:#37201C;
+      --shadow:0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0D1315;--surface:#151E20;--surface-2:#1E2A2C;--ink:#E7EEEC;--ink-2:#C3CFCD;
+    --muted:#8FA2A3;--hair:#2C3B3D;--accent:#EFA744;--accent-soft:#3A2A14;--teal:#5FBEB8;
+    --teal-soft:#14302F;--ok:#74CB99;--ok-soft:#153025;--risk:#EC8C79;--risk-soft:#37201C;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:0 96px}
+  .col{max-width:70ch}
+  p{margin:0 0 1.1em}
+  a{color:var(--accent)}
+  strong{font-weight:600}
+  h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+  .eyebrow{font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+  /* masthead */
+  header.mast{padding-block:64px 44px;border-bottom:2px solid var(--ink);margin-bottom:0}
+  .mast h1{font-size:clamp(40px,7vw,68px);font-weight:800;letter-spacing:-.03em;line-height:1;margin:14px 0 0}
+  .mast .sub{font-size:20px;color:var(--ink-2);max-width:60ch;margin-top:18px;line-height:1.5}
+  .facts{display:flex;flex-wrap:wrap;gap:0;margin-top:34px;border-top:1px solid var(--hair)}
+  .fact{flex:1 1 150px;padding:14px 18px 14px 0;border-right:1px solid var(--hair)}
+  .fact:last-child{border-right:0}
+  .fact b{display:block;font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+  .fact span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  section{padding-block:52px 0}
+  h2{font-size:clamp(26px,3.6vw,34px);font-weight:700;letter-spacing:-.02em;margin:10px 0 18px;line-height:1.15}
+  h3{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0 0 6px}
+  .rule{height:1px;background:var(--hair);margin-top:4px}
+
+  /* figures */
+  figure{margin:30px 0 0}
+  .fig-scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:20px 18px 14px}
+  figure svg{display:block;height:auto;max-width:100%;color:var(--ink)}
+  #orgchart{min-width:860px}
+  #timeline{min-width:800px}
+  figcaption{font-size:14.5px;color:var(--muted);margin-top:12px;max-width:68ch;line-height:1.5}
+
+  /* desks */
+  .desk{margin-top:34px;border-top:1px solid var(--hair);padding-top:20px}
+  .desk-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:6px}
+  .desk-head h3{font-size:15px;font-family:var(--f-mono);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+  .sched{font-family:var(--f-mono);font-size:11px;color:var(--muted);background:var(--surface-2);padding:3px 8px;border-radius:4px}
+  .desk > p.lede{max-width:70ch;color:var(--ink-2);margin-bottom:18px}
+  .emp{display:grid;grid-template-columns:200px 1fr;gap:10px 26px;padding:16px 0;border-top:1px dotted var(--hair)}
+  .emp:first-of-type{border-top:0}
+  .emp .who .code{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);display:block}
+  .emp .who .name{font-family:var(--f-display);font-size:17px;font-weight:700;letter-spacing:-.01em;display:block;margin-top:2px}
+  .emp .what{font-size:16px;line-height:1.55}
+  .emp .what p{margin:0 0 .6em}
+  .emp .what p:last-child{margin-bottom:0}
+  .note{border-left:2px solid var(--accent);padding-left:12px;color:var(--ink-2);font-size:15px}
+
+  /* tables */
+  .tbl-scroll{overflow-x:auto;margin-top:22px}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:15.5px}
+  th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:0 16px 8px 0;border-bottom:1px solid var(--ink)}
+  td{padding:13px 16px 13px 0;border-bottom:1px solid var(--hair);vertical-align:top;line-height:1.45}
+  td.num{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pill{display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;white-space:nowrap}
+  .pill.yes{background:var(--ok-soft);color:var(--ok)}
+  .pill.no{background:var(--risk-soft);color:var(--risk)}
+  .pill.part{background:var(--teal-soft);color:var(--teal)}
+
+  /* record card */
+  .record{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:20px 22px;margin-top:24px;box-shadow:var(--shadow);max-width:640px}
+  .record .rtitle{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .record dl{display:grid;grid-template-columns:auto 1fr;gap:7px 18px;margin:0;font-family:var(--f-mono);font-size:13px}
+  .record dt{color:var(--muted)}
+  .record dd{margin:0;color:var(--ink)}
+  .record dd em{color:var(--accent);font-style:normal}
+
+  /* phases */
+  .phase{display:grid;grid-template-columns:64px 1fr;gap:22px;padding:22px 0;border-top:1px solid var(--hair)}
+  .phase .n{font-family:var(--f-display);font-size:38px;font-weight:800;line-height:.9;color:var(--accent);letter-spacing:-.04em}
+  .phase .n small{display:block;font-family:var(--f-mono);font-size:10px;font-weight:500;letter-spacing:.08em;color:var(--muted);margin-top:6px;text-transform:uppercase}
+  .phase h3{margin-bottom:4px}
+  .phase p{margin:0 0 .5em;max-width:62ch}
+  .phase .ship{font-family:var(--f-mono);font-size:12.5px;color:var(--teal);background:var(--teal-soft);display:inline-block;padding:4px 10px;border-radius:4px;margin-top:4px}
+
+  /* asks */
+  ol.asks{list-style:none;counter-reset:a;padding:0;margin:22px 0 0;max-width:72ch}
+  ol.asks li{counter-increment:a;position:relative;padding:14px 0 14px 46px;border-top:1px solid var(--hair)}
+  ol.asks li::before{content:counter(a,decimal-leading-zero);position:absolute;left:0;top:15px;font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--accent)}
+  ol.asks li b{font-weight:600}
+  ol.asks li span{display:block;color:var(--muted);font-size:15px;margin-top:2px}
+
+  .app{display:grid;grid-template-columns:232px 1fr;gap:28px;margin-top:26px;align-items:start}
+  .side{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:14px 12px;box-shadow:var(--shadow)}
+  .side .grp{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:12px 10px 6px}
+  .side .grp:first-child{padding-top:2px}
+  .side a{display:block;font-family:var(--f-display);font-size:14px;font-weight:500;color:var(--ink);text-decoration:none;padding:6px 10px;border-radius:5px;cursor:default}
+  .side a.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .side .brand{font-family:var(--f-display);font-size:14px;font-weight:800;letter-spacing:-.02em;padding:4px 10px 10px;border-bottom:1px solid var(--hair);margin-bottom:4px}
+  .grpnote{padding:14px 0;border-top:1px solid var(--hair)}
+  .grpnote:first-child{border-top:0;padding-top:0}
+  .grpnote b{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:4px}
+  .grpnote p{margin:0;font-size:15.5px;line-height:1.5}
+  @media (max-width:700px){.app{grid-template-columns:1fr}}
+  .callout{background:var(--accent-soft);border-radius:10px;padding:20px 24px;margin-top:28px;max-width:72ch}
+  .callout p:last-child{margin-bottom:0}
+  .callout .eyebrow{color:var(--accent)}
+
+  @media (max-width:640px){
+    body{font-size:16px}
+    .emp{grid-template-columns:1fr;gap:6px}
+    .phase{grid-template-columns:44px 1fr;gap:14px}
+    .phase .n{font-size:28px}
+    .fact{border-right:0;flex-basis:44%}
+  }
+  @media (prefers-reduced-motion:no-preference){a{transition:opacity .15s}}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="eyebrow">Org design · for Adarsh · 16 Sep 2026</div>
+  <h1>Creator OS Newsroom</h1>
+  <p class="sub">Thirteen AI employees, four desks, one manager you speak to once a day — and one feedback loop that makes next week's scripts better than this week's.</p>
+  <div class="facts">
+    <div class="fact"><b>13</b><span>AI employees</span></div>
+    <div class="fact"><b>4</b><span>desks</span></div>
+    <div class="fact"><b>1</b><span>daily brief</span></div>
+    <div class="fact"><b>15 min</b><span>of your time</span></div>
+    <div class="fact"><b>~40%</b><span>already built</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="eyebrow">The shape of it</div><div class="rule"></div>
+  <h2>A newsroom, not a chatbot</h2>
+  <div class="col">
+    <p>You described a team, so I built it like a real newsroom: desks that run on a clock, a manager who assigns and reports, and a strict order of work. The order is the whole point — <strong>Intelligence finds it, Creative writes it, Production ships it, Performance judges it, and Performance writes back into Creative.</strong> That last arrow is what separates this from thirteen separate chat windows.</p>
+    <p>Most people who build this skip the last arrow. Then every script starts from zero and the tool stops being useful in three weeks. Here, the Playbook Keeper rewrites one file every week, and the Hook Writer and Scriptwriter read that file before they write a single line. The system gets sharper whether or not you do anything.</p>
+    <h3 style="margin-top:26px">The scoreboard is not views</h3>
+    <p>The goal you described is a cult, not a chart: an audience that recognises you, relates to you, and follows you off Instagram later — to YouTube, to a podcast, to a brand deal. Views do not measure that. So the Performance Desk is tuned to four numbers instead: <strong>follows-per-post</strong> (did this reel convert a stranger), <strong>saves</strong> (did they want it again), <strong>profile visits</strong> (did they want <em>you</em>, not the clip), and <strong>returning viewers</strong> (did the same person come back). A 400k-view reel that produced eleven follows is a failure here, and the system will say so.</p>
+    <p>One consequence worth building for: cults run on repetition. The Playbook therefore also tracks <strong>recurring assets</strong> — your catchphrases, your named series, your signature formats — and the Scriptwriter is instructed to reuse them deliberately rather than inventing a new personality every reel. Recognition is the mechanism.</p>
+  </div>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg id="orgchart" viewBox="0 0 900 880" role="img" aria-label="Org chart: Adarsh talks to one manager, who runs four desks in sequence — Intelligence, Creative, Production, Performance — and Performance feeds its findings and its proven formats back into Creative.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+          </marker>
+          <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"/>
+          </marker>
+          <marker id="arM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--muted)"/>
+          </marker>
+        </defs>
+
+        <!-- Adarsh -->
+        <rect x="300" y="14" width="300" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <text x="450" y="32" text-anchor="middle" font-family="var(--f-mono)" font-size="9" letter-spacing="1.2" fill="var(--muted)">HUMAN</text>
+        <text x="450" y="48" text-anchor="middle" font-family="var(--f-display)" font-size="13" font-weight="700" fill="currentColor">ADARSH — one conversation a day</text>
+        <line x1="450" y1="58" x2="450" y2="76" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+
+        <!-- Manager -->
+        <rect x="250" y="80" width="400" height="54" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="450" y="101" text-anchor="middle" font-family="var(--f-mono)" font-size="9.5" letter-spacing="1.4" fill="var(--accent)">M-00 · THE MANAGER</text>
+        <text x="450" y="120" text-anchor="middle" font-family="var(--f-display)" font-size="12.5" font-weight="700" fill="currentColor">Chief of Staff — runs every desk, files the 06:00 brief</text>
+
+        <!-- oversight rail -->
+        <path d="M650 107 H856 V800" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 4"/>
+        <text x="852" y="97" text-anchor="end" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">assigns · schedules · chases · reports</text>
+        <line x1="856" y1="234" x2="768" y2="234" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 4" marker-end="url(#arM)"/>
+        <line x1="856" y1="410" x2="768" y2="410" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 4" marker-end="url(#arM)"/>
+        <line x1="856" y1="586" x2="768" y2="586" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 4" marker-end="url(#arM)"/>
+        <line x1="856" y1="762" x2="768" y2="762" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 4" marker-end="url(#arM)"/>
+
+        <!-- BAND 1 : INTELLIGENCE -->
+        <rect x="90" y="168" width="670" height="132" rx="8" fill="var(--surface-2)" stroke="var(--hair)" stroke-width="1"/>
+        <text x="104" y="193" font-family="var(--f-mono)" font-size="10.5" font-weight="600" letter-spacing="1.5" fill="var(--teal)">INTELLIGENCE DESK</text>
+        <text x="746" y="193" text-anchor="end" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">02:00–05:00, unattended</text>
+        <g>
+          <rect x="104" y="204" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="245" cy="215" r="3" fill="var(--teal)"/>
+          <text x="114" y="219" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">I-01</text>
+          <text x="114" y="236" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">News Desk</text>
+          <text x="114" y="251" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">reads your papers and</text>
+          <text x="114" y="263" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">RSS list every night</text>
+
+          <rect x="267" y="204" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="408" cy="215" r="3" fill="var(--teal)"/>
+          <text x="277" y="219" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">I-02</text>
+          <text x="277" y="236" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Influencer Watch</text>
+          <text x="277" y="251" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">your 40 handles, tagged</text>
+          <text x="277" y="263" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">right / left / neutral</text>
+
+          <rect x="430" y="204" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="571" cy="215" r="3" fill="var(--teal)"/>
+          <text x="440" y="219" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">I-03</text>
+          <text x="440" y="236" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Trend Scout</text>
+          <text x="440" y="251" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">formats rising inside</text>
+          <text x="440" y="263" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">your niche, not all of IG</text>
+
+          <rect x="593" y="204" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="734" cy="215" r="3" fill="var(--teal)"/>
+          <text x="603" y="219" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">I-04</text>
+          <text x="603" y="236" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Deep Research</text>
+          <text x="603" y="251" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">on demand — facts,</text>
+          <text x="603" y="263" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">sources, counter-arguments</text>
+        </g>
+        <line x1="425" y1="300" x2="425" y2="340" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <text x="437" y="325" font-family="var(--f-body)" font-size="10.5" fill="var(--ink-2)">tomorrow's 5 topics, ranked and sourced</text>
+
+        <!-- BAND 2 : CREATIVE -->
+        <rect x="90" y="344" width="670" height="132" rx="8" fill="var(--surface-2)" stroke="var(--hair)" stroke-width="1"/>
+        <text x="104" y="369" font-family="var(--f-mono)" font-size="10.5" font-weight="600" letter-spacing="1.5" fill="var(--teal)">CREATIVE DESK</text>
+        <text x="746" y="369" text-anchor="end" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">on demand, while you watch</text>
+        <g>
+          <rect x="104" y="380" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="245" cy="391" r="3" fill="var(--teal)"/>
+          <text x="114" y="395" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">C-01</text>
+          <text x="114" y="412" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Topic Planner</text>
+          <text x="114" y="427" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">turns 15 raw stories</text>
+          <text x="114" y="439" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">into 5 decided reels</text>
+
+          <rect x="267" y="380" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="408" cy="391" r="3" fill="var(--teal)"/>
+          <text x="277" y="395" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">C-02</text>
+          <text x="277" y="412" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Hook Writer</text>
+          <text x="277" y="427" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">8 hooks on your formula,</text>
+          <text x="277" y="439" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">reach vs intent tagged</text>
+
+          <rect x="430" y="380" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="571" cy="391" r="3" fill="var(--teal)"/>
+          <text x="440" y="395" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">C-03</text>
+          <text x="440" y="412" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Scriptwriter</text>
+          <text x="440" y="427" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">your voice, learned from</text>
+          <text x="440" y="439" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">your own transcripts</text>
+
+          <rect x="593" y="380" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="734" cy="391" r="3" fill="var(--teal)"/>
+          <text x="603" y="395" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">C-04</text>
+          <text x="603" y="412" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Packaging</text>
+          <text x="603" y="427" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">caption, hashtags,</text>
+          <text x="603" y="439" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">cover text, Shorts title</text>
+        </g>
+        <line x1="425" y1="476" x2="425" y2="516" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <text x="437" y="501" font-family="var(--f-body)" font-size="10.5" fill="var(--ink-2)">approved script + shoot card + edit brief</text>
+
+        <!-- BAND 3 : PRODUCTION -->
+        <rect x="90" y="520" width="670" height="132" rx="8" fill="var(--surface-2)" stroke="var(--hair)" stroke-width="1"/>
+        <text x="104" y="545" font-family="var(--f-mono)" font-size="10.5" font-weight="600" letter-spacing="1.5" fill="var(--teal)">PRODUCTION DESK</text>
+        <text x="746" y="545" text-anchor="end" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">2 AI + 2 humans</text>
+        <g>
+          <rect x="104" y="556" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="245" cy="567" r="3" fill="var(--teal)"/>
+          <text x="114" y="571" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">P-01</text>
+          <text x="114" y="588" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Coordinator</text>
+          <text x="114" y="603" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">writes the brief a hired</text>
+          <text x="114" y="615" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">editor can follow alone</text>
+
+          <rect x="267" y="556" width="153" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="408" cy="567" r="3" fill="var(--teal)"/>
+          <text x="277" y="571" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">P-02</text>
+          <text x="277" y="588" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Scheduler</text>
+          <text x="277" y="603" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">calendar, slot times,</text>
+          <text x="277" y="615" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">status of every reel</text>
+
+          <rect x="430" y="556" width="153" height="76" rx="5" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="5 4"/>
+          <text x="440" y="571" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">HUMAN</text>
+          <text x="440" y="588" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">You — camera</text>
+          <text x="440" y="603" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">talking head is the</text>
+          <text x="440" y="615" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">whole product</text>
+
+          <rect x="593" y="556" width="153" height="76" rx="5" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="5 4"/>
+          <text x="603" y="571" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">HUMAN</text>
+          <text x="603" y="588" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Editor</text>
+          <text x="603" y="603" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">AI cannot edit video —</text>
+          <text x="603" y="615" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">you were right</text>
+        </g>
+        <line x1="425" y1="652" x2="425" y2="692" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <text x="437" y="677" font-family="var(--f-body)" font-size="10.5" fill="var(--ink-2)">published post + its real numbers, 48h later</text>
+
+        <!-- BAND 4 : PERFORMANCE -->
+        <rect x="90" y="696" width="670" height="132" rx="8" fill="var(--surface-2)" stroke="var(--hair)" stroke-width="1"/>
+        <text x="104" y="721" font-family="var(--f-mono)" font-size="10.5" font-weight="600" letter-spacing="1.5" fill="var(--teal)">PERFORMANCE DESK</text>
+        <text x="746" y="721" text-anchor="end" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">daily pull · weekly teardown</text>
+        <g>
+          <rect x="104" y="732" width="207" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="299" cy="743" r="3" fill="var(--teal)"/>
+          <text x="114" y="747" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">A-01</text>
+          <text x="114" y="764" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Performance Analyst</text>
+          <text x="114" y="779" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">scores follows, saves and profile</text>
+          <text x="114" y="791" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">visits — deliberately not views</text>
+
+          <rect x="321" y="732" width="207" height="76" rx="5" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.6"/>
+          <circle cx="516" cy="743" r="3" fill="var(--accent)"/>
+          <text x="331" y="747" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">A-03</text>
+          <text x="331" y="764" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Pattern Analyst</text>
+          <text x="331" y="779" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">tears your winners apart and</text>
+          <text x="331" y="791" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">rebuilds them as templates</text>
+
+          <rect x="538" y="732" width="207" height="76" rx="5" fill="var(--surface)" stroke="var(--hair)"/>
+          <circle cx="733" cy="743" r="3" fill="var(--teal)"/>
+          <text x="548" y="747" font-family="var(--f-mono)" font-size="8.5" letter-spacing=".8" fill="var(--muted)">A-02</text>
+          <text x="548" y="764" font-family="var(--f-display)" font-size="11.5" font-weight="700" fill="currentColor">Playbook Keeper</text>
+          <text x="548" y="779" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">rewrites the one file the</text>
+          <text x="548" y="791" font-family="var(--f-body)" font-size="9.5" fill="var(--ink-2)">writers read before writing</text>
+        </g>
+
+        <!-- feedback loop -->
+        <path d="M90 770 H44 V410 H82" fill="none" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arA)"/>
+        <text transform="rotate(-90 30 590)" x="30" y="590" text-anchor="middle" font-family="var(--f-mono)" font-size="9.5" font-weight="600" letter-spacing=".5" fill="var(--accent)">what won → new playbook + formats</text>
+
+        <!-- legend -->
+        <rect x="104" y="848" width="14" height="10" rx="2" fill="var(--surface)" stroke="var(--hair)"/>
+        <text x="126" y="857" font-family="var(--f-mono)" font-size="9.5" fill="var(--muted)">AI employee (13)</text>
+        <rect x="256" y="848" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-dasharray="3 3"/>
+        <text x="278" y="857" font-family="var(--f-mono)" font-size="9.5" fill="var(--muted)">human (you + your editor)</text>
+        <line x1="462" y1="853" x2="486" y2="853" stroke="var(--accent)" stroke-width="1.8"/>
+        <text x="494" y="857" font-family="var(--f-mono)" font-size="9.5" fill="var(--muted)">the loop that makes it compound</text>
+      </svg>
+    </div>
+    <figcaption>The desks run top to bottom in that order every day. The marigold rail on the left is the only edge that is optional to build — and the only one that decides whether this tool is still useful in month three.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="eyebrow">The clock</div><div class="rule"></div>
+  <h2>What a day actually looks like</h2>
+  <div class="col">
+    <p>Your schedule already has content from 9 AM to 12. The newsroom is built around that block, not around itself. Everything the desks can do without you happens while you are asleep, so that at 9 AM you are choosing, not researching.</p>
+  </div>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg id="timeline" viewBox="0 0 900 250" role="img" aria-label="A 24-hour cycle: desks run at 2 AM, the brief is filed at 6 AM, you spend 15 minutes choosing topics at 9 AM, shoot at 11, publish in the evening, and 48 hours later the numbers rewrite the playbook that feeds back into the 9 AM step.">
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="60" y="30" width="14" height="10" rx="2" fill="var(--teal)"/>
+        <text x="82" y="39" font-family="var(--f-mono)" font-size="9.5" fill="var(--muted)">runs itself</text>
+        <rect x="176" y="30" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-dasharray="3 3"/>
+        <text x="198" y="39" font-family="var(--f-mono)" font-size="9.5" fill="var(--muted)">needs you</text>
+
+        <line x1="60" y1="110" x2="876" y2="110" stroke="var(--hair)" stroke-width="2"/>
+
+        <circle cx="70" cy="110" r="6" fill="var(--teal)"/>
+        <text x="70" y="88" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="600" fill="currentColor">02:00</text>
+        <text x="70" y="135" text-anchor="middle" font-family="var(--f-display)" font-size="12" font-weight="700" fill="currentColor">Desks wake</text>
+        <text x="70" y="150" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">scrape, read, pull</text>
+
+        <circle cx="210" cy="110" r="6" fill="var(--teal)"/>
+        <text x="210" y="88" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="600" fill="currentColor">06:00</text>
+        <text x="210" y="135" text-anchor="middle" font-family="var(--f-display)" font-size="12" font-weight="700" fill="currentColor">Brief filed</text>
+        <text x="210" y="150" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">on your phone before</text>
+        <text x="210" y="162" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">you open Instagram</text>
+
+        <circle cx="350" cy="110" r="7" fill="var(--ground)" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>
+        <text x="350" y="88" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="600" fill="var(--accent)">09:00</text>
+        <text x="350" y="135" text-anchor="middle" font-family="var(--f-display)" font-size="12" font-weight="700" fill="currentColor">Your 15 minutes</text>
+        <text x="350" y="150" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">pick 5 topics, get back</text>
+        <text x="350" y="162" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">hooks and full scripts</text>
+
+        <circle cx="490" cy="110" r="7" fill="var(--ground)" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>
+        <text x="490" y="88" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="600" fill="currentColor">10:00</text>
+        <text x="490" y="135" text-anchor="middle" font-family="var(--f-display)" font-size="12" font-weight="700" fill="currentColor">Shoot</text>
+        <text x="490" y="150" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">5 reels, one per pillar</text>
+
+        <circle cx="630" cy="110" r="7" fill="var(--ground)" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>
+        <text x="630" y="88" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="600" fill="currentColor">18:00</text>
+        <text x="630" y="135" text-anchor="middle" font-family="var(--f-display)" font-size="12" font-weight="700" fill="currentColor">Edit + publish</text>
+        <text x="630" y="150" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">you or your editor,</text>
+        <text x="630" y="162" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">working off the brief</text>
+
+        <circle cx="770" cy="110" r="6" fill="var(--teal)"/>
+        <text x="770" y="88" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="600" fill="currentColor">+48h</text>
+        <text x="770" y="135" text-anchor="middle" font-family="var(--f-display)" font-size="12" font-weight="700" fill="currentColor">Numbers land</text>
+        <text x="770" y="150" text-anchor="middle" font-family="var(--f-body)" font-size="10" fill="var(--muted)">playbook rewritten</text>
+
+        <path d="M876 110 V200 H350 V174" fill="none" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#ar2)"/>
+        <text x="620" y="216" text-anchor="middle" font-family="var(--f-mono)" font-size="10" font-weight="600" fill="var(--accent)">tomorrow's scripts already know what won</text>
+      </svg>
+    </div>
+    <figcaption>Six stations, but only three need you — and the 09:00 one is the only one that needs your judgement. Everything before it is preparation; everything after it is execution and measurement.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="eyebrow">The roster</div><div class="rule"></div>
+  <h2>Every employee, and exactly what they hand over</h2>
+  <div class="col">
+    <p>An employee is defined by what lands on someone else's desk. If an agent's output isn't the input to a named next agent, it shouldn't exist. Here is the full staff.</p>
+  </div>
+
+  <div class="desk">
+    <div class="desk-head"><h3>Intelligence Desk</h3><span class="sched">02:00–05:00 · unattended · 4 employees</span></div>
+    <p class="lede">Answers one question: <em>what is worth talking about today.</em> Runs before you wake up so the answer is already waiting.</p>
+
+    <div class="emp">
+      <div class="who"><span class="code">I-01</span><span class="name">News Desk Analyst</span></div>
+      <div class="what"><p>Reads the newspaper and RSS list you give it, every night. Pulls only stories that touch your niche and discards the rest. Each survivor becomes a story card: source link, two-line summary, why it could travel, and how fast it will go stale.</p>
+      <p>Scores each on shareability — not on importance. An important story you can't make a 60-second reel about is a story for someone else.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">I-02</span><span class="name">Influencer Watch</span></div>
+      <div class="what"><p>Watches your 40 handles, each tagged by you as right / left / neutral. Every new post gets logged: topic, format, the hook line, views, likes, comments, posted-at. Then you filter it the way you described — <em>show me every right-wing account that touched this topic in the last 7 days, sorted by views.</em></p>
+      <p>It also decides which of their posts deserve a full teardown, and it does <em>not</em> use an absolute view threshold. A 50k account pulling 300k views is a far stronger signal than a 5M account pulling 1M. So an outlier is defined <strong>relative to that account's own 30-day median</strong> — roughly 3× their own normal. That is what surfaces a format that is genuinely working, rather than just surfacing whoever is biggest.</p>
+      <p class="note">One honest limit: shares and saves on <em>other people's</em> posts cannot be obtained by any tool. Instagram gives those numbers only to the account that owns the post. The desk uses (likes + comments) ÷ views as the engagement proxy and applies it consistently, so comparisons between accounts stay fair even though the absolute number isn't the real one.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">I-03</span><span class="name">Trend Scout</span></div>
+      <div class="what"><p>Not general Instagram trends — trends <em>inside your niche</em>, which is the only kind you can act on in time. It flags a format or an angle when three or more of your watched accounts use it within seven days. Three independent accounts converging is a real early signal; one viral reel is not.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">I-04</span><span class="name">Deep Research Analyst</span></div>
+      <div class="what"><p>The only desk that runs on demand instead of on a clock. You say <em>research this</em> and it returns a dossier: verified facts with dates and numbers, primary sources you can open, what the other side argues, and a Risk line listing claims you should not make on camera.</p>
+      <p>This is the one that lets you speak on a topic with actual authority rather than repeating what another reel said.</p></div>
+    </div>
+  </div>
+
+  <div class="desk">
+    <div class="desk-head"><h3>Creative Desk</h3><span class="sched">on demand · while you watch · 4 employees</span></div>
+    <p class="lede">Turns intelligence into a shootable reel. This is the desk you will actually talk to.</p>
+
+    <div class="emp">
+      <div class="who"><span class="code">C-01</span><span class="name">Topic Planner</span></div>
+      <div class="what"><p>The bridge, and the most underrated job here. It takes everything the Intelligence Desk found plus your five pillars and returns tomorrow's menu: five topics, one per pillar, each with a why-now line and a confidence note. Fifteen raw stories are a burden. Five decided reels are a day's work.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">C-02</span><span class="name">Hook Writer</span></div>
+      <div class="what"><p>Eight hooks per approved topic, every one built on your own formula: recognizable trigger word first, then a specific outcome, with the method withheld. It tags each hook <em>wide reach</em> or <em>high intent</em> so you pick deliberately instead of by feel.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">C-03</span><span class="name">Scriptwriter</span></div>
+      <div class="what"><p>Writes in your voice, learned from 20–30 of your own reel transcripts. 60–90 seconds, Hinglish, talking head, a re-hook every 10–15 seconds, one built-in share line, one CTA, with pause and emphasis cues marked. You reply <em>make it angrier, cut 15 seconds, more Hindi</em> and it rewrites on the spot.</p>
+      <p>Script quality here is directly proportional to how many real transcripts you feed it. Five transcripts produce a generic AI script. Twenty-five produce something that sounds like you.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">C-04</span><span class="name">Packaging Writer</span></div>
+      <div class="what"><p>Caption, first comment, hashtags, on-screen text, cover-frame text, and the YouTube Shorts title. Six different jobs that most people write as one — the cover frame stops the scroll, the caption earns the share, the title does search. Different words for each.</p></div>
+    </div>
+  </div>
+
+  <div class="desk">
+    <div class="desk-head"><h3>Production Desk</h3><span class="sched">2 AI + 2 humans</span></div>
+    <p class="lede">You were right that AI can't edit video. So this desk's job is to make the human work as small and as delegatable as possible.</p>
+
+    <div class="emp">
+      <div class="who"><span class="code">P-01</span><span class="name">Production Coordinator</span></div>
+      <div class="what"><p>Turns an approved script into two documents: a <em>shoot card</em> (setting, wardrobe note, props, any b-roll to grab) and an <em>edit brief</em> (cut points, where captions sit, where to zoom, music mood, target length).</p>
+      <p>The edit brief is the real unlock — it is written so a hired editor can finish a reel without calling you. That is what turns editing from your bottleneck into someone else's task.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">P-02</span><span class="name">Publishing Scheduler</span></div>
+      <div class="what"><p>Holds the calendar and the slot times — derived from your own data, not from generic best-time-to-post advice. Tracks every reel through its states: Idea → Researched → Scripted → Shot → Editing → Scheduled → Published. Anything stuck more than two days goes into the Manager's brief as a blocker.</p></div>
+    </div>
+  </div>
+
+  <div class="desk">
+    <div class="desk-head"><h3>Performance Desk</h3><span class="sched">daily pull · weekly teardown · 3 employees</span></div>
+    <p class="lede">The smallest desk and the one that decides whether any of this was worth building.</p>
+
+    <div class="emp">
+      <div class="who"><span class="code">A-01</span><span class="name">Performance Analyst</span></div>
+      <div class="what"><p>Pulls your own post metrics properly through Instagram's official API — views, reach, likes, comments, shares, saves, and follows-from-post. For your own account these numbers are fully available and licensed; no scraping needed.</p>
+      <p>Then it answers the question you actually asked: which content earned <em>followers</em>, which earned <em>shares</em>, which earned <em>saves</em>, which earned <em>comments</em>. These are usually four different reels. Broken down by pillar, hook type, script length, and posting time.</p>
+      <p>It stops at <em>which</em>. Working out <em>why</em> is the Pattern Analyst's job; keeping the answer somewhere the writers will actually read it is the Playbook Keeper's.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">A-03</span><span class="name">Pattern Analyst</span></div>
+      <div class="what"><p>Out of a hundred reels, ten outperform. This employee's only job is to work out <em>why</em>, structurally, and then let you fire that same structure at a completely different topic.</p>
+      <p>It takes each winner's actual transcript and breaks it into beats with timings — <em>relatable open (0–4s) → contradiction (4–9s) → three escalating examples (9–40s) → the turn (40–55s) → share line</em> — names the mechanism that makes it work, strips every trace of the original topic out of it, and files it as a numbered, reusable Format. The Scriptwriter then writes new topics <em>into</em> that beat structure instead of starting from a blank page.</p>
+      <p class="note">The trap it is built to avoid: looking only at your winners. If eight of your ten hits open with sarcasm, that proves nothing until you check the flops — if forty of your ninety flops also opened with sarcasm, then sarcasm is not the cause, it is just how you talk. So a pattern is only promoted to a Format when it shows up in <strong>three or more winners</strong> and is <strong>meaningfully rarer in the losers</strong>. Everything else stays a hunch and is labelled as one. Almost everybody gets this backwards and ends up extremely confident about the wrong thing.</p>
+      <p>It also tracks <strong>format fatigue</strong>. A format that worked eight times starts dying somewhere around the tenth use, as your audience learns the shape before you do. Every Format carries a use count and a performance-per-use trend, so the desk can flag one for retirement or mutation before it drags you down rather than after.</p>
+      <p>And it runs in both directions. Pointed at the Influencer Watch desk's outliers, the same teardown tells you what is working on other creators' pages — their topic, their hook shape, their format, their structure — and files those as formats you can fire at your own topics.</p>
+      <p>Doing that to forty accounts naively would be very expensive, because a teardown needs the <em>transcript</em>, and getting a transcript means pulling the video and running speech-to-text. So it runs in two stages:</p>
+      <p><strong>Stage one, nightly and cheap:</strong> scrape all forty accounts, numbers only — no video, no transcription. <strong>Stage two, selective and paid:</strong> only a post that beats its own account's 30-day median by roughly 3× gets its video pulled, transcribed and torn down. That is perhaps five to fifteen reels a week instead of six hundred, which is the difference between about ₹300 a month and about ₹15,000.</p>
+      <p class="note">Borrowed formats are not proven formats, and the library keeps them apart. Anything torn out of your own winners is filed as <strong>Proven</strong> — it already worked on your audience. Anything lifted from another creator is filed as a <strong>Candidate</strong>, and stays a candidate until it has worked on <em>your</em> page twice. Mixing these two is how creators end up copying a format that was never going to transfer and concluding their content is broken.</p>
+      <p>The same forty-account data answers a second question for free: where the gaps are. If a topic is pulling heavy engagement across the left-wing accounts and no right-wing account has touched it in ten days, that is an opening, and the Topic Planner gets told.</p></div>
+    </div>
+
+    <div class="emp">
+      <div class="who"><span class="code">A-02</span><span class="name">Playbook Keeper</span></div>
+      <div class="what"><p>Once a week it rewrites a single file — the Playbook — with what won, what died, and what changed. The Hook Writer and the Scriptwriter load that file as context before they write anything.</p>
+      <p class="note">This is the compounding agent. Build everything else and skip this one, and in three weeks you have thirteen chatbots that never learned anything. Build this one, and month three is measurably better than month one without you doing anything extra.</p></div>
+    </div>
+  </div>
+
+  <div class="desk" style="border-top:0;padding-top:0;margin-top:26px">
+    <h3 style="margin-bottom:8px">What actually copies, and what doesn't</h3>
+    <div class="col"><p>Worth being precise about, because "duplicate what works for them" is true of some layers and dangerous for others.</p></div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th style="width:22%">Layer</th><th style="width:20%">Transfers?</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Format / structure</strong></td><td><span class="pill yes">Copy freely</span></td><td>Beat order, pacing, where the contradiction lands, where the turn sits. This is mechanical and audience-independent. It is the single most portable thing in short-form.</td></tr>
+          <tr><td><strong>Hook shape</strong></td><td><span class="pill part">Copy the shape</span></td><td>The construction transfers; the trigger word does not. Swap in a word <em>your</em> audience recognises — their trigger word is tuned to their following, not yours.</td></tr>
+          <tr><td><strong>Topic</strong></td><td><span class="pill part">Test, don't assume</span></td><td>A topic that hit for a 2M account can die flat on your page, because their audience is not your audience. Treat a borrowed topic as a hypothesis, and give it a Proven format so at least one variable is controlled.</td></tr>
+          <tr><td><strong>Voice / persona</strong></td><td><span class="pill no">Never copy</span></td><td>This one is not a technical limit, it is the goal. You said you want people to follow <em>you</em> to YouTube and to a podcast later. Nobody follows the second version of someone else. Borrow the skeleton; the voice stays yours, which is exactly what the Scriptwriter's voice profile is there to protect.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="desk">
+    <div class="desk-head"><h3>The Manager</h3><span class="sched">M-00 · the only one you talk to</span></div>
+    <div class="emp">
+      <div class="who"><span class="code">M-00</span><span class="name">Chief of Staff</span></div>
+      <div class="what"><p>Runs the desks on schedule, chases what's stuck, and files one Daily Brief at 06:00 containing exactly six things:</p>
+      <p><strong>1.</strong> What's trending today in your niche. <strong>2.</strong> What's ready for you — topics, hooks, scripts waiting. <strong>3.</strong> What's working, from last week's numbers. <strong>4.</strong> What stopped working, which matters more. <strong>5.</strong> What's blocked and needs a decision from you. <strong>6.</strong> One question it wants answered.</p>
+      <p>You reply to the brief in plain Hinglish. It re-tasks the desks from your reply. That is the entire interface — you never need to open thirteen different screens.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Straight answers</div><div class="rule"></div>
+  <h2>What is genuinely possible, and what isn't</h2>
+  <div class="col">
+    <p>You asked for a few things that no tool can do, and it's cheaper to know that now than in week three. Everything marked buildable, I can build.</p>
+  </div>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th style="width:26%">What you asked for</th><th style="width:15%">Verdict</th><th>The honest version</th></tr></thead>
+      <tbody>
+        <tr><td>Competitor topics, views, likes, comments</td><td><span class="pill yes">Buildable</span></td><td>Via a third-party scraper (Apify). Works reliably, costs per post scraped, and is against Instagram's terms of service — common practice, small but real risk. Worth knowing, not a reason to stop.</td></tr>
+        <tr><td>Competitor <em>shares</em> and <em>saves</em></td><td><span class="pill no">Not possible</span></td><td>Instagram gives these to the post owner only. No tool anywhere has them. We use (likes + comments) ÷ views as a consistent proxy and label it as a proxy, not a truth.</td></tr>
+        <tr><td>Your own shares, saves, follows-per-post</td><td><span class="pill yes">Buildable</span></td><td>Official Instagram Graph API, fully licensed. Needs your account to be a Business or Creator account linked to a Facebook Page.</td></tr>
+        <tr><td>Scripts in your own Hindi speaking style</td><td><span class="pill yes">Buildable</span></td><td>The single highest-value piece. Needs 20–30 of your real transcripts. This is a one-time effort from you and it determines the ceiling on everything the Creative Desk produces.</td></tr>
+        <tr><td>AI edits the video</td><td><span class="pill no">Not possible</span></td><td>Correct as you said. Stays you or a hired editor. What AI does instead is write an edit brief precise enough that the editor never has to ask you a question.</td></tr>
+        <tr><td>Trending audio detection</td><td><span class="pill part">Partly</span></td><td>No API exists for this. What we can do is better anyway: flag an audio when three of your watched accounts use it in a week. Niche-specific beats global-trending.</td></tr>
+        <tr><td>Tearing down other creators' winning reels</td><td><span class="pill yes">Buildable</span></td><td>Needs their transcript, so their video gets pulled and transcribed — only for outliers, roughly 5–15 reels a week rather than all of them. Around ₹300 a month at that volume. Same scraping caveat as the row above.</td></tr>
+        <tr><td>Transcribing your reels from a link</td><td><span class="pill yes">Buildable</span></td><td>Inside the product, not in chat: paste reel URLs, it pulls the video, strips the audio, runs speech-to-text tuned for Hinglish, and stores the transcript. Roughly ₹100 for thirty reels, and it keeps learning from every new reel you post.</td></tr>
+        <tr><td>Reading newspapers daily</td><td><span class="pill yes">Buildable</span></td><td>RSS and public articles work. Paywalled full text will not come through — you'll get headline plus standfirst for those, which is usually enough to decide if a story is worth a reel.</td></tr>
+        <tr><td>Auto-posting to Instagram</td><td><span class="pill part">Later</span></td><td>The Graph API can publish Reels. My recommendation is to keep publishing manual for the first few months — one bad auto-post on a political topic is expensive to undo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Where you actually work</div><div class="rule"></div>
+  <h2>It is a website, not a chat window</h2>
+  <div class="col">
+    <p>Three separate things are easy to confuse, so to be exact about it: <strong>this chat is the workshop</strong> where the software gets built and decisions get made. <strong>The website is where you work every day</strong> — it holds the data, runs the schedules, and keeps the history. <strong>The Claude or Gemini API is the engine inside the website</strong> — the same intelligence, but running on a clock instead of waiting for you to type.</p>
+    <p>The reason it cannot stay in a chat is narrow and decisive: a chat cannot wake up at 2 AM. Everything the Intelligence Desk does depends on work happening while you sleep, and everything the Pattern Analyst does depends on a hundred reels sitting in a table you can query. Neither is possible in a conversation. You open a browser at 9 AM — on your phone or your laptop — and the work is already done.</p>
+  </div>
+
+  <div class="app">
+    <nav class="side" aria-label="Example navigation">
+      <div class="brand">Creator OS</div>
+      <div class="grp">Daily</div>
+      <a class="on">Today</a><a>Ideas</a><a>Studio</a><a>Board</a>
+      <div class="grp">What you learn</div>
+      <a>Formats</a><a>Library</a><a>Performance</a>
+      <div class="grp">What you feed it</div>
+      <a>Watchlist</a><a>Sources</a><a>Brand Brain</a>
+      <div class="grp">System</div>
+      <a>Employees</a><a>Settings</a>
+    </nav>
+    <div>
+      <div class="grpnote"><b>Daily</b><p><strong>Today</strong> is the 06:00 brief, and the only screen you need most mornings. <strong>Ideas</strong> is the ranked topic menu to approve or reject. <strong>Studio</strong> is the writing room — pick a topic, get hooks, get a script, rewrite it by talking to it. <strong>Board</strong> tracks every reel from Idea to Published.</p></div>
+      <div class="grpnote"><b>What you learn</b><p><strong>Formats</strong> is the template library, Proven and Candidate, with use counts and fatigue trends. <strong>Library</strong> is every reel you have ever posted — transcript, numbers, and which format it used. <strong>Performance</strong> is follows, saves and profile visits, broken down.</p></div>
+      <div class="grpnote"><b>What you feed it</b><p><strong>Watchlist</strong> is your 40 accounts with the filters you asked for. <strong>Sources</strong> is your newspapers and feeds. <strong>Brand Brain</strong> is your voice profile, pillars, hook formula and banned claims — the file all thirteen employees read.</p></div>
+      <div class="grpnote"><b>System</b><p><strong>Employees</strong> lists all thirteen with their prompts, models, schedules and monthly spend — edit or switch off any of them. <strong>Settings</strong> holds the Anthropic / Gemini switch and your Instagram connection.</p></div>
+    </div>
+  </div>
+  <figcaption style="margin-top:16px">Twelve screens, one sidebar, responsive down to phone width. Hosting is the same as your other apps — Supabase and Vercel, effectively free at your volume; the only real running cost is the API usage in the table below.</figcaption>
+
+  <div class="col" style="margin-top:34px">
+    <h3>The Library is the important one</h3>
+    <p>If you build only one table properly, build that one: every reel you have posted, with its transcript, its numbers, and the format it used. The Scriptwriter reads it to sound like you. The Pattern Analyst reads it to find what works. The Playbook Keeper reads it to know what changed. Every other screen is a view onto it. Get it loaded once and the rest of the system has something to stand on.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Under the hood</div><div class="rule"></div>
+  <h2>How it's built, and what you switch in the admin panel</h2>
+  <div class="col">
+    <p>Same stack as your other apps, so nothing new to learn: React + Vite + TypeScript + Tailwind on the front, Supabase for database, auth, edge functions and the cron scheduler, deployed on Vercel.</p>
+    <p>The important architectural decision: <strong>an employee is a database row, not a code file.</strong> Their name, their instructions, their model, their schedule — all editable from the admin panel. That means you can hire a fourteenth employee, fire one that isn't earning its cost, or rewrite the Scriptwriter's instructions at 11 PM without anyone touching code.</p>
+  </div>
+
+  <div class="record">
+    <div class="rtitle">Admin → Employees → C-03</div>
+    <dl>
+      <dt>name</dt><dd>Scriptwriter</dd>
+      <dt>desk</dt><dd>creative</dd>
+      <dt>provider</dt><dd><em>anthropic</em> &nbsp;|&nbsp; google</dd>
+      <dt>model</dt><dd>claude-opus-5</dd>
+      <dt>schedule</dt><dd>on_demand</dd>
+      <dt>reads</dt><dd>brand_brain, playbook, topic_card, hooks</dd>
+      <dt>writes</dt><dd>script</dd>
+      <dt>prompt</dt><dd>[ editable textarea ]</dd>
+      <dt>spend_mtd</dt><dd>₹412</dd>
+      <dt>enabled</dt><dd><em>on</em></dd>
+    </dl>
+  </div>
+
+  <div class="col" style="margin-top:28px">
+    <h3>The provider switch you asked for</h3>
+    <p>Admin → Settings → AI Provider: pick Anthropic or Google, paste one key, hit Test. Keys are stored as Supabase secrets, never in the browser. Then each employee can override the default — which is how you keep the bill down: a cheap fast model does the scraping, tagging and classification work, and only the Scriptwriter and Deep Research Analyst get an expensive model. A running spend-per-employee meter sits next to each row, so if the Trend Scout costs ₹800 a month and you never read its output, you can see that and switch it off.</p>
+
+    <h3 style="margin-top:22px">The Brand Brain</h3>
+    <p>One shared file every employee reads before it does anything: your voice profile built from the transcripts, your five pillars, your hook formula, your positioning, and a banned-claims list. Update it in one place and all thirteen change behaviour at once. This is what stops the team from drifting into generic AI voice over time.</p>
+
+    <h3 style="margin-top:22px">What already exists</h3>
+    <p>Your <em>Above 1 Million</em> project at <code>~/above1million</code> already contains a working Apify Instagram scraper edge function, a reels table, a daily cron, and a Claude classification step. That is the Influencer Watch desk, already written and build-clean. I'd lift it rather than write it twice — it removes roughly a week from the schedule.</p>
+  </div>
+
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr><th style="width:24%">What it costs</th><th style="width:20%">Rough monthly</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Apify scraping</td><td class="num">₹800 – ₹2,000</td><td>40 handles, roughly 80 posts a day. Scales with how many accounts you watch, not with how much you use it.</td></tr>
+        <tr><td>AI — cheap jobs</td><td class="num">₹300 – ₹700</td><td>Classification, tagging, summarising. Gemini Flash or Haiku class models.</td></tr>
+        <tr><td>AI — scripts &amp; research</td><td class="num">₹1,500 – ₹3,500</td><td>Five scripts a day plus research dossiers on a strong model. This is where quality lives; don't economise here.</td></tr>
+        <tr><td>Supabase + Vercel</td><td class="num">₹0 – ₹2,200</td><td>Free tiers cover a single-operator tool comfortably at first.</td></tr>
+        <tr><td><strong>Total</strong></td><td class="num"><strong>₹2,600 – ₹8,400</strong></td><td>Verify current Apify and model pricing before committing — these are ballparks, not quotes.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Build order</div><div class="rule"></div>
+  <h2>Four weeks, each one useful on its own</h2>
+  <div class="col">
+    <p>Sequenced so you get something you'd actually use at the end of every week. If you stop after any phase, what's built still works. Five weeks now rather than four — because the intake screens moved to the front, where they belong.</p>
+  </div>
+
+  <div class="phase">
+    <div class="n">1<small>week</small></div>
+    <div>
+      <h3>The intake</h3>
+      <p>Every screen your data lives in, built before a single AI employee: Watchlist (your 40 handles, tagged), Sources (newspapers and RSS), Brand Brain (pillars, hook formula, positioning, banned claims), Settings (the Anthropic / Gemini switch), and Voice Training — paste reel URLs, it transcribes them and builds your voice profile.</p>
+      <p>This moved to the front because you asked the right question: the data belongs in the product, not in a chat window. Fill it once and all thirteen employees read from it forever.</p>
+      <p>One addition worth the extra day: the intake takes each past reel's <strong>numbers alongside its transcript</strong>. Same paste, two payoffs — the Scriptwriter gets your voice, and the Pattern Analyst gets a hundred labelled examples of what worked and what didn't, on day one, before you post anything new.</p>
+      <p class="ship">You end week one with a working voice profile</p>
+    </div>
+  </div>
+  <div class="phase">
+    <div class="n">2<small>week</small></div>
+    <div>
+      <h3>The writers</h3>
+      <p>The whole Creative Desk — Topic Planner, Hook Writer, Scriptwriter, Packaging Writer — reading the Brand Brain you filled in week one.</p>
+      <p class="ship">Voice-matched scripts on demand</p>
+    </div>
+  </div>
+  <div class="phase">
+    <div class="n">3<small>week</small></div>
+    <div>
+      <h3>The desks that feed them</h3>
+      <p>News Desk, Influencer Watch (lifted from Above 1 Million), Trend Scout, Deep Research. The Manager comes online and the 06:00 Daily Brief starts arriving.</p>
+      <p class="ship">You stop hunting for topics</p>
+    </div>
+  </div>
+  <div class="phase">
+    <div class="n">4<small>week</small></div>
+    <div>
+      <h3>The loop</h3>
+      <p>Instagram Graph API connection, Performance Analyst, Pattern Analyst, Playbook Keeper — scoring on follows, saves, profile visits and returning viewers rather than views. The writers start reading last week's results, and writing into proven formats, before they write a line.</p>
+      <p>The Pattern Analyst is the one that can jump the queue: it works off your back catalogue, so it can be producing formats in week two if your archive is loaded.</p>
+      <p class="ship">The system begins to compound</p>
+    </div>
+  </div>
+  <div class="phase">
+    <div class="n">5<small>week</small></div>
+    <div>
+      <h3>The board</h3>
+      <p>Production Coordinator, Publishing Scheduler, the Kanban board and calendar. Optional: connect a hired editor so briefs reach them directly.</p>
+      <p class="ship">Editing stops being your bottleneck</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Before I start</div><div class="rule"></div>
+  <h2>What you paste in, and where it goes</h2>
+  <div class="col">
+    <p>You asked whether to hand this to me in chat or put it in the product. Put it in the product — you were right, and I have moved the intake screens to week one so they exist before you need them. Chat data dies when the session ends; product data is queried every night at 2 AM for as long as the tool runs, and it is the same screen a client would fill later.</p>
+    <p>Only one item is an exception, and only because it de-risks the rest.</p>
+  </div>
+  <ol class="asks">
+    <li><b>Three reel transcripts — in chat, now</b><span>Not thirty. Three. I need them before the pipeline exists so I can prove the voice profile actually sounds like you before you invest any time in the other twenty-seven. If three fail, the approach is wrong and we find out on day one instead of day ten.</span></li>
+    <li><b>The other 27 reels — into the product, week one</b><span>Paste the reel URLs into the Voice Training screen. It pulls the video, strips the audio, transcribes it in Hinglish, and adds it to your voice profile. Never do the download-convert-paste loop by hand thirty times.</span></li>
+    <li><b>Your 40 influencer handles — into the product</b><span>Watchlist screen, each tagged right / left / neutral. Handles, not links.</span></li>
+    <li><b>Your newspaper and source list — into the product</b><span>Sources screen. Hindi and English both, whichever you actually read.</span></li>
+    <li><b>Confirm your pillars — in chat</b><span>My notes have your five pillars as AI Tools, Trend-jack, Taarak Mehta format, Network Marketing, and Your Apps. But right-wing / left-wing influencer tracking and daily newspaper reading points at a political-commentary niche instead. This changes the Topic Planner and I need the answer before I write it.</span></li>
+    <li><b>Your Instagram account type — in chat</b><span>Business or Creator, and whether a Facebook Page is linked. Without that link, none of your own follow, share and save numbers can be read, and the Performance Desk has nothing to score.</span></li>
+    <li><b>One AI key — into the product</b><span>Anthropic or Gemini. This is the only non-optional key: it is the brain all thirteen employees run on. Apify, Instagram and speech-to-text get added later, desk by desk, as each one is built.</span></li>
+  </ol>
+
+  <div class="callout">
+    <div class="eyebrow">One thing worth saying</div>
+    <p>Build this for yourself first and resist turning it into a product for a few months. You already have Academy OS with a hundred-tenant target, and a Creator OS sold to other creators would be a second business competing for the same weeks. The org above happens to be multi-tenant-shaped, so the door stays open — but keep it shut until your own page proves the system works.</p>
+  </div>
+</section>
+
+</div>
