@@ -24,14 +24,6 @@ alter table app_settings       enable row level security;
 do $$
 declare t text;
 begin
-  foreach t in array array['reels','watchlist_accounts','watclist_posts_placeholder'] loop
-    null; -- placeholder guard, real loop below
-  end loop;
-end $$;
-
-do $$
-declare t text;
-begin
   foreach t in array array[
     'reels','watchlist_accounts','watchlist_posts','sources',
     'news_stories','brand_brain','employees','app_settings'
