@@ -83,9 +83,9 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: "claude-sonnet-5",
-        max_tokens: 3000,
+        max_tokens: 8000,
         output_config: { effort: "medium" },
-        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 5 }],
+        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
         system:
           "You are a fact-checker. Search the web for real, verifiable facts about the topic " +
           "given. Return a plain numbered list. Every line must end with the source URL in " +
@@ -98,7 +98,17 @@ Deno.serve(async (req) => {
       return json({ error: `Anthropic error: ${await anthropicRes.text()}` }, 502);
     }
     const result = await anthropicRes.json();
-    return json({ text: extractText(result.content ?? []) });
+    const text = extractText(result.content ?? []);
+    // A truncated or empty response used to render as a silent blank screen —
+    // this is what Adarsh hit. Raised max_tokens (3 searches can burn a lot of
+    // the budget before writing the answer) and now this fails loud instead.
+    if (!text.trim()) {
+      return json(
+        { error: `Research produced no usable text (stop_reason: ${result.stop_reason}). Try a narrower topic, or try again.` },
+        502,
+      );
+    }
+    return json({ text });
   }
 
   // --- Hooks / Script: Brand Brain applies, and only the research's facts are allowed. ---
@@ -178,5 +188,12 @@ Deno.serve(async (req) => {
   }
 
   const result = await anthropicRes.json();
-  return json({ text: extractText(result.content ?? []) });
+  const text = extractText(result.content ?? []);
+  if (!text.trim()) {
+    return json(
+      { error: `${body.action} produced no usable text (stop_reason: ${result.stop_reason}). Try again.` },
+      502,
+    );
+  }
+  return json({ text });
 });

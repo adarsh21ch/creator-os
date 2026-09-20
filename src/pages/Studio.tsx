@@ -1,14 +1,74 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import type { StudioSession } from '../types'
 
 export function StudioPage() {
+  const qc = useQueryClient()
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [topic, setTopic] = useState('')
   const [hook, setHook] = useState('')
   const [researchText, setResearchText] = useState('')
   const [hooksText, setHooksText] = useState('')
   const [scriptText, setScriptText] = useState('')
   const [skipResearch, setSkipResearch] = useState(false)
+
+  // Every step upserts into studio_sessions — one row per topic, filled in as it
+  // goes, not thrown away when the page is left. See STATUS.md for the design.
+  async function saveStep(fields: Partial<StudioSession>) {
+    if (sessionId) {
+      const { error } = await supabase
+        .from('studio_sessions')
+        .update({ ...fields, updated_at: new Date().toISOString() })
+        .eq('id', sessionId)
+      if (error) throw error
+    } else {
+      const { data, error } = await supabase
+        .from('studio_sessions')
+        .insert({ topic, ...fields })
+        .select('id')
+        .single()
+      if (error) throw error
+      setSessionId(data.id)
+    }
+    qc.invalidateQueries({ queryKey: ['studio_sessions'] })
+  }
+
+  const history = useQuery({
+    queryKey: ['studio_sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('studio_sessions')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(20)
+      if (error) throw error
+      return data as StudioSession[]
+    },
+  })
+
+  function loadSession(s: StudioSession) {
+    setSessionId(s.id)
+    setTopic(s.topic)
+    setResearchText(s.research_text ?? '')
+    setHooksText(s.hooks_text ?? '')
+    setChosenHookAndClear(s.chosen_hook ?? '')
+    setScriptText(s.script_text ?? '')
+  }
+
+  function setChosenHookAndClear(h: string) {
+    setHook(h)
+  }
+
+  function newSession() {
+    setSessionId(null)
+    setTopic('')
+    setResearchText('')
+    setHooksText('')
+    setHook('')
+    setScriptText('')
+    setSkipResearch(false)
+  }
 
   const genResearch = useMutation({
     mutationFn: async () => {
@@ -19,7 +79,10 @@ export function StudioPage() {
       if (data?.error) throw new Error(data.error)
       return data.text as string
     },
-    onSuccess: (text) => setResearchText(text),
+    onSuccess: async (text) => {
+      setResearchText(text)
+      await saveStep({ research_text: text })
+    },
   })
 
   const genHooks = useMutation({
@@ -31,7 +94,10 @@ export function StudioPage() {
       if (data?.error) throw new Error(data.error)
       return data.text as string
     },
-    onSuccess: (text) => setHooksText(text),
+    onSuccess: async (text) => {
+      setHooksText(text)
+      await saveStep({ hooks_text: text })
+    },
   })
 
   const genScript = useMutation({
@@ -43,7 +109,10 @@ export function StudioPage() {
       if (data?.error) throw new Error(data.error)
       return data.text as string
     },
-    onSuccess: (text) => setScriptText(text),
+    onSuccess: async (text) => {
+      setScriptText(text)
+      await saveStep({ chosen_hook: hook, script_text: text })
+    },
   })
 
   const canResearch = topic.trim().length > 0
@@ -51,11 +120,24 @@ export function StudioPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-xl font-semibold">Studio</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        Topic → real sources → hooks in your formula → a full script in your voice — reading from
-        the Brand Brain you've already set up.
-      </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-semibold">Studio</h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            Topic → real sources → hooks in your formula → a full script in your voice — reading
+            from the Brand Brain you've already set up. Every step is saved as you go.
+          </p>
+        </div>
+        {sessionId && (
+          <button
+            type="button"
+            onClick={newSession}
+            className="shrink-0 rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
+          >
+            + New topic
+          </button>
+        )}
+      </div>
 
       <div className="mt-6 space-y-2">
         <label htmlFor="topic" className="text-sm font-medium">
@@ -67,10 +149,8 @@ export function StudioPage() {
           placeholder="What's today's reel about?"
           value={topic}
           onChange={(e) => {
+            if (sessionId) newSession()
             setTopic(e.target.value)
-            setResearchText('')
-            setHooksText('')
-            setScriptText('')
           }}
           className="w-full rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
         />
@@ -164,11 +244,52 @@ export function StudioPage() {
             {scriptText}
           </pre>
           <p className="text-xs text-neutral-500">
-            Not saved automatically yet — copy it into the Library once you've shot it, along with
-            the real numbers once you have them.
+            Saved to History automatically. Once you've shot it, add the real numbers in the
+            Library too — that's what teaches the Pattern Analyst later.
           </p>
         </div>
       )}
+
+      <div className="mt-10 border-t border-neutral-200 pt-6 dark:border-neutral-800">
+        <h2 className="text-sm font-semibold">History</h2>
+        {history.isLoading && <p className="mt-2 text-sm text-neutral-500">Loading…</p>}
+        {history.isError && (
+          <p className="mt-2 text-sm text-red-600">{(history.error as Error).message}</p>
+        )}
+        {history.data && history.data.length === 0 && (
+          <p className="mt-2 text-sm text-neutral-500">
+            Nothing yet — your first topic above will show up here once you research or write
+            hooks for it.
+          </p>
+        )}
+        <div className="mt-3 space-y-2">
+          {history.data?.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => loadSession(s)}
+              className={`block w-full rounded-md border p-3 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 ${
+                s.id === sessionId
+                  ? 'border-purple-400 bg-purple-50 dark:border-purple-700 dark:bg-purple-900/20'
+                  : 'border-neutral-200 dark:border-neutral-800'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="truncate font-medium">{s.topic}</span>
+                <span className="shrink-0 text-xs text-neutral-500">
+                  {new Date(s.updated_at).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="mt-1 flex gap-3 text-xs text-neutral-500">
+                <span>{s.research_text ? '✓ research' : '— research'}</span>
+                <span>{s.hooks_text ? '✓ hooks' : '— hooks'}</span>
+                <span>{s.script_text ? '✓ script' : '— script'}</span>
+                <span>{s.reel_id ? '✓ posted' : '— not posted'}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

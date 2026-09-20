@@ -93,3 +93,15 @@ export type Employee = {
   enabled: boolean
   created_at: string
 }
+
+export type StudioSession = {
+  id: string
+  topic: string
+  research_text: string | null
+  hooks_text: string | null
+  chosen_hook: string | null
+  script_text: string | null
+  reel_id: string | null
+  created_at: string
+  updated_at: string
+}

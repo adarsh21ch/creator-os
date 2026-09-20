@@ -173,7 +173,24 @@ includes the CORS headers). **Needs redeploying** — see next action.
 - Everything else still empty: `watchlist_accounts`, `sources`, `employees`, `news_stories`,
   `watchlist_posts`.
 
-## NEXT BUILD, queued 2026-09-20: Studio history + persistence
+## Studio history — BUILT 2026-09-20 (same day it was queued)
+
+Table `studio_sessions` (migration 0007), RLS'd the same as everything else. Studio now
+upserts into it on every step (research/hooks/script), and a History list at the bottom of
+the page shows past topics with a status row (✓ research / ✓ hooks / ✓ script / posted) —
+click one to reload the whole thing back into view. `reel_id` column exists for the future
+Library link but no linking button yet, per the scoped-down plan below.
+
+**Also fixed in the same pass: the "blank result" bug Adarsh hit.** Root cause — the research
+call's `max_tokens: 3000` combined with up to 5 web searches could exhaust the budget before
+Claude ever wrote the final answer, so `extractText` returned `""` and the UI rendered nothing
+with no error. Fixed: `max_tokens` raised to 8000, `max_uses` lowered to 3 (leaves more room,
+costs less per search), and every response path now fails loudly with the real `stop_reason`
+instead of silently returning empty text.
+
+**NOT DEPLOYED YET** — `supabase functions deploy studio-generate` needs to run again.
+
+## Original design notes (superseded by "BUILT" above, kept for the reel_id follow-up)
 
 Adarsh's own words: "search history, the data we have creating, everything should be persist...
 I can watch my previous scripts, hooks, data maintains... and then performance inside." Correct
