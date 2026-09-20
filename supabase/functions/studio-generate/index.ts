@@ -84,7 +84,9 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "claude-sonnet-5",
         max_tokens: 8000,
-        output_config: { effort: "medium" },
+        // Search-and-summarize doesn't need deep reasoning — "low" effort is
+        // both faster and cheaper here, and speed is what this call needed.
+        output_config: { effort: "low" },
         tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
         system:
           "You are a fact-checker. Search the web for real, verifiable facts about the topic " +

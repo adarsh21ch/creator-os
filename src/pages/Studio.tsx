@@ -105,7 +105,7 @@ export function StudioPage() {
     mutationFn: async () => {
       const { data, error } = await withTimeout(
         supabase.functions.invoke('studio-generate', { body: { action: 'research', topic } }),
-        60000,
+        120000,
         'Research',
       )
       if (error) throw error

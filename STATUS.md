@@ -206,6 +206,13 @@ elapsed seconds in the button label ("Searching the web… 14s") so "is it stuck
 visible answer. Library doesn't have this yet — same pattern should be applied there if it
 recurs.
 
+**Root cause of the actual timeout, found via the new error message itself:** research legitimately
+took longer than 60s — the client-side cutoff was set too tight, and `effort: "medium"` asks the
+model to reason harder than a search-and-summarize task needs. Fixed: research's effort lowered
+to `"low"` (faster AND cheaper — this task never needed medium), client timeout raised to 120s as
+a generous but still-bounded ceiling. NOT DEPLOYED YET — needs `supabase functions deploy
+studio-generate`.
+
 ## Original design notes (superseded by "BUILT" above, kept for the reel_id follow-up)
 
 Adarsh's own words: "search history, the data we have creating, everything should be persist...
