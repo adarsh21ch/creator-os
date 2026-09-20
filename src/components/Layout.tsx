@@ -11,7 +11,7 @@ const groups: NavGroup[] = [
     items: [
       { to: '/', label: 'Today', phase1: false },
       { to: '/ideas', label: 'Ideas', phase1: false },
-      { to: '/studio', label: 'Studio', phase1: false },
+      { to: '/studio', label: 'Studio', phase1: true },
       { to: '/board', label: 'Board', phase1: false },
     ],
   },

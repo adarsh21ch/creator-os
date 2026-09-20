@@ -120,6 +120,38 @@ the new permissions. Worth knowing for any future migration that touches grants.
 **The Nevorai Tools migration is complete and confirmed working end to end.** Old standalone
 Supabase project is fully replaced and safe to delete.
 
+## Studio built (2026-09-20) — Phase 2 has started
+
+First two real AI employees are live in code: **C-02 Hook Writer** and **C-03 Scriptwriter**,
+both in one edge function `supabase/functions/studio-generate`. Model: **Sonnet 5** for both,
+deliberately not Haiku — hooks and scripts are the two highest-leverage, viewer-facing outputs
+in the system, and the Sonnet-vs-Haiku cost gap here is only ~₹200/month. Haiku is earmarked for
+later, more mechanical employees (Packaging Writer, bulk classification of scraped posts).
+
+- Reads the Anthropic key and Brand Brain straight from the database — this is exactly what the
+  Settings key-save feature (built earlier the same day) was for. No Edge Function secret needed
+  for the AI key itself.
+- Brand Brain's system-prompt block is cache_control'd (ephemeral) — it's identical on every call,
+  so this is the prompt-caching win discussed with Adarsh, built in from day one rather than
+  bolted on later.
+- **Auth gap found and fixed on BOTH edge functions**, not just the new one: neither
+  `studio-generate` nor the pre-existing `ingest-instagram` checked that the caller was actually
+  signed in — the anon key alone (public, ships in the browser bundle) would have been enough to
+  invoke them and spend Apify/Anthropic credits. Both now verify a real user JWT first.
+- Also fixed: `ingest-instagram` was never updated with `db: { schema: 'creator_os' }` after the
+  Nevorai Tools move — it would have silently written into `public` instead. Caught before it was
+  ever deployed to the new project.
+
+**Studio UI**: topic in → 8 hooks tagged [WIDE REACH]/[HIGH INTENT] → pick one → full 60-90s
+script with pause/emphasis cues. Not persisted to the Library automatically yet — Adarsh copies
+the final script in manually once shot, along with real numbers. Topic is free-typed for now;
+the Topic Planner (auto-suggesting topics from Intelligence Desk data) is still Phase 3.
+
+**NOT DEPLOYED YET** — code is written and build-clean, but this machine's Supabase CLI is still
+linked to the OLD project (`ljfiqwuidwilfoxqvtqx`). Needs re-linking to Nevorai Tools
+(`wxgfaaaboftzsazknbvl`) before `supabase functions deploy` will reach the right place — see
+"WHAT YOU DO NEXT" the next time this is picked up.
+
 ## Database is now seeded (2026-09-16)
 
 - `reels`: **7 rows** — the 4 winners and 3 losers, with `is_organic` set correctly (l01 and l02

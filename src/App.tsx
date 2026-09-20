@@ -8,6 +8,7 @@ import { LaterPage } from './pages/Later'
 import { LibraryPage } from './pages/Library'
 import { SettingsPage } from './pages/Settings'
 import { SourcesPage } from './pages/Sources'
+import { StudioPage } from './pages/Studio'
 import { WatchlistPage } from './pages/Watchlist'
 
 const queryClient = new QueryClient()
@@ -41,7 +42,7 @@ function Gate() {
           <Route element={<Layout />}>
             <Route index element={<LaterPage />} />
             <Route path="ideas" element={<LaterPage />} />
-            <Route path="studio" element={<LaterPage />} />
+            <Route path="studio" element={<StudioPage />} />
             <Route path="board" element={<LaterPage />} />
             <Route path="formats" element={<LaterPage />} />
             <Route path="library" element={<LibraryPage />} />

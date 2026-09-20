@@ -7,10 +7,14 @@
 // function returns a clear 400 instead of failing silently.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+
+// Targets the creator_os schema now that this project lives inside the
+// shared Nevorai Tools project — this was missing before the move and would
+// have silently written into "public" instead.
+const supabase = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+  db: { schema: "creator_os" },
+});
 
 const APIFY_TOKEN = Deno.env.get("APIFY_API_TOKEN");
 const APIFY_ACTOR = "apify~instagram-scraper";
@@ -22,6 +26,18 @@ type Body = {
 };
 
 Deno.serve(async (req) => {
+  // Require a real signed-in user — this writes rows and spends Apify credits,
+  // so the anon key alone must not be enough to call it.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const asCaller = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    db: { schema: "creator_os" },
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: userData, error: authError } = await asCaller.auth.getUser();
+  if (authError || !userData?.user) {
+    return new Response(JSON.stringify({ error: "Not signed in." }), { status: 401 });
+  }
+
   if (!APIFY_TOKEN) {
     return new Response(
       JSON.stringify({ error: "APIFY_API_TOKEN is not set. See README for how to add it." }),
