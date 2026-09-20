@@ -111,6 +111,15 @@ never needed this — a schema we create ourselves does not inherit that.
 table added in Phase 2+ gets the same access automatically, without needing a 0007 for the same
 mistake.
 
+**VERIFIED LIVE 2026-09-20:** Library loads all 7 reels in the browser (5 organic, 2 paid,
+matching the winners/losers split exactly). Migration required one extra manual step beyond the
+SQL itself: `NOTIFY pgrst, 'reload schema';` — GRANT/REVOKE statements don't trigger Supabase's
+usual auto-reload the way CREATE/ALTER do, so the API layer needed an explicit nudge to pick up
+the new permissions. Worth knowing for any future migration that touches grants.
+
+**The Nevorai Tools migration is complete and confirmed working end to end.** Old standalone
+Supabase project is fully replaced and safe to delete.
+
 ## Database is now seeded (2026-09-16)
 
 - `reels`: **7 rows** — the 4 winners and 3 losers, with `is_organic` set correctly (l01 and l02
