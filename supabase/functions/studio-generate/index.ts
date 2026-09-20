@@ -7,6 +7,7 @@
 // beats the small savings Haiku would offer here. Haiku is the right choice
 // for later, more mechanical employees (Packaging Writer, bulk classification).
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { corsHeaders, json } from "../_shared/cors.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -16,6 +17,8 @@ type Body =
   | { action: "script"; topic: string; hook: string };
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
   // Require a real signed-in user — the anon key alone must not be enough to
   // spend Adarsh's Anthropic credits. Verify the caller's own JWT first,
   // then switch to the service-role client to read secrets/brand data.
@@ -26,7 +29,7 @@ Deno.serve(async (req) => {
   });
   const { data: userData, error: authError } = await asCaller.auth.getUser();
   if (authError || !userData?.user) {
-    return new Response(JSON.stringify({ error: "Not signed in." }), { status: 401 });
+    return json({ error: "Not signed in." }, 401);
   }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
@@ -40,10 +43,7 @@ Deno.serve(async (req) => {
     .single();
   const apiKey = settings?.anthropic_api_key;
   if (!apiKey) {
-    return new Response(
-      JSON.stringify({ error: "No Anthropic key saved. Add one in Settings first." }),
-      { status: 400 },
-    );
+    return json({ error: "No Anthropic key saved. Add one in Settings first." }, 400);
   }
 
   const { data: brand } = await supabase
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
 
   const body = (await req.json()) as Body;
   if (!body.topic?.trim()) {
-    return new Response(JSON.stringify({ error: "topic is required" }), { status: 400 });
+    return json({ error: "topic is required" }, 400);
   }
 
   const brandBrainBlock = [
@@ -82,9 +82,7 @@ Deno.serve(async (req) => {
     maxTokens = 1200;
   } else {
     if (!body.hook?.trim()) {
-      return new Response(JSON.stringify({ error: "hook is required for action=script" }), {
-        status: 400,
-      });
+      return json({ error: "hook is required for action=script" }, 400);
     }
     userPrompt =
       `Topic: ${body.topic}\nChosen hook: ${body.hook}\n\n` +
@@ -112,13 +110,11 @@ Deno.serve(async (req) => {
 
   if (!anthropicRes.ok) {
     const errText = await anthropicRes.text();
-    return new Response(JSON.stringify({ error: `Anthropic error: ${errText}` }), { status: 502 });
+    return json({ error: `Anthropic error: ${errText}` }, 502);
   }
 
   const result = await anthropicRes.json();
   const text = result.content?.find((b: { type: string }) => b.type === "text")?.text ?? "";
 
-  return new Response(JSON.stringify({ text }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return json({ text });
 });

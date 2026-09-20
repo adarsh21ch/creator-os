@@ -6,6 +6,7 @@
 // never by Claude (see README for the exact command). Until it's set this
 // function returns a clear 400 instead of failing silently.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { corsHeaders, json } from "../_shared/cors.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
@@ -26,6 +27,8 @@ type Body = {
 };
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
   // Require a real signed-in user — this writes rows and spends Apify credits,
   // so the anon key alone must not be enough to call it.
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -35,24 +38,19 @@ Deno.serve(async (req) => {
   });
   const { data: userData, error: authError } = await asCaller.auth.getUser();
   if (authError || !userData?.user) {
-    return new Response(JSON.stringify({ error: "Not signed in." }), { status: 401 });
+    return json({ error: "Not signed in." }, 401);
   }
 
   if (!APIFY_TOKEN) {
-    return new Response(
-      JSON.stringify({ error: "APIFY_API_TOKEN is not set. See README for how to add it." }),
-      { status: 400 },
-    );
+    return json({ error: "APIFY_API_TOKEN is not set. See README for how to add it." }, 400);
   }
 
   const body = (await req.json()) as Body;
   if (!body.url) {
-    return new Response(JSON.stringify({ error: "url is required" }), { status: 400 });
+    return json({ error: "url is required" }, 400);
   }
   if (body.kind === "competitor" && !body.account_id) {
-    return new Response(JSON.stringify({ error: "account_id is required for kind=competitor" }), {
-      status: 400,
-    });
+    return json({ error: "account_id is required for kind=competitor" }, 400);
   }
 
   const runRes = await fetch(
@@ -65,17 +63,13 @@ Deno.serve(async (req) => {
   );
 
   if (!runRes.ok) {
-    return new Response(JSON.stringify({ error: `Apify error: ${await runRes.text()}` }), {
-      status: 502,
-    });
+    return json({ error: `Apify error: ${await runRes.text()}` }, 502);
   }
 
   const items = await runRes.json();
   const item = items?.[0];
   if (!item) {
-    return new Response(JSON.stringify({ error: "Apify returned no data for this URL" }), {
-      status: 502,
-    });
+    return json({ error: "Apify returned no data for this URL" }, 502);
   }
 
   const posted_at = item.timestamp ? new Date(item.timestamp).toISOString().slice(0, 10) : null;
@@ -96,7 +90,7 @@ Deno.serve(async (req) => {
       comments,
       notes: `Ingested from ${body.url}`,
     });
-    if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    if (error) return json({ error: error.message }, 500);
   } else {
     const { error } = await supabase.from("watchlist_posts").upsert(
       {
@@ -110,10 +104,8 @@ Deno.serve(async (req) => {
       },
       { onConflict: "post_url" },
     );
-    if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    if (error) return json({ error: error.message }, 500);
   }
 
-  return new Response(JSON.stringify({ ok: true, views, likes, comments }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return json({ ok: true, views, likes, comments });
 });

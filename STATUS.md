@@ -147,10 +147,18 @@ script with pause/emphasis cues. Not persisted to the Library automatically yet 
 the final script in manually once shot, along with real numbers. Topic is free-typed for now;
 the Topic Planner (auto-suggesting topics from Intelligence Desk data) is still Phase 3.
 
-**NOT DEPLOYED YET** — code is written and build-clean, but this machine's Supabase CLI is still
-linked to the OLD project (`ljfiqwuidwilfoxqvtqx`). Needs re-linking to Nevorai Tools
-(`wxgfaaaboftzsazknbvl`) before `supabase functions deploy` will reach the right place — see
-"WHAT YOU DO NEXT" the next time this is picked up.
+**Deployed 2026-09-20** — CLI was linked to the wrong Supabase account (leftover from an earlier
+project), fixed with `supabase logout` + `supabase login` + re-link, then both functions deployed
+to `wxgfaaaboftzsazknbvl`.
+
+**Bug found on first real test: CORS.** Studio's "Generate hooks" failed with "Failed to send a
+request to the Edge Function" — the generic error `supabase-js` throws when the browser's CORS
+preflight (OPTIONS request) gets no answer, not a real error from inside the function. Supabase
+Edge Functions don't handle CORS automatically; every function called from a browser needs an
+explicit OPTIONS handler and `Access-Control-Allow-*` headers on every response, or the browser
+blocks the call before it reaches the server. Fixed in both `studio-generate` and
+`ingest-instagram` via `supabase/functions/_shared/cors.ts` (a `json()` helper that always
+includes the CORS headers). **Needs redeploying** — see next action.
 
 ## Database is now seeded (2026-09-16)
 
