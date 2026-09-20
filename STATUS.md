@@ -173,6 +173,39 @@ includes the CORS headers). **Needs redeploying** — see next action.
 - Everything else still empty: `watchlist_accounts`, `sources`, `employees`, `news_stories`,
   `watchlist_posts`.
 
+## NEXT BUILD, queued 2026-09-20: Studio history + persistence
+
+Adarsh's own words: "search history, the data we have creating, everything should be persist...
+I can watch my previous scripts, hooks, data maintains... and then performance inside." Correct
+call — Studio is currently a whiteboard that erases itself. Every research/hooks/script call is
+thrown away the moment he navigates off the page. Design for the fix, so a fresh session can
+build it without re-deriving:
+
+**New table `studio_sessions`:**
+```
+id uuid pk, topic text, research_text text, hooks_text text, chosen_hook text,
+script_text text, reel_id uuid null references reels(id), created_at timestamptz
+```
+`reel_id` is the important field — once he actually posts something drafted in Studio and enters
+its real numbers in the Library, linking the two lets a future Pattern Analyst compare *drafted
+structure* against *actual performance*, not just posted-reel structure. This is the natural
+extension of the Format/Pattern Analyst design already in `docs/04-formats.md` — Studio history
+is training data for it, not just a convenience feature.
+
+**Studio.tsx changes:** every research/hooks/script call also upserts into `studio_sessions`
+(one row per topic session, updated as each step completes, not three separate rows). Add a
+**History** list — either a new sidebar screen or a collapsible panel in Studio itself — showing
+past sessions by topic/date, clickable to reload the full research+hooks+script back into view.
+A "Mark as posted" action on a history row should let him link it to a Library reel once shot.
+
+**RLS/schema:** additive only, same pattern as every other table here — one migration, authenticated-only
+policy, default privileges already cover it (0006 set that up for anything added later, so this
+needs no new grant statements).
+
+**Scope note:** don't build the full Performance rollup in the same pass — land the persistence
+and History view first, confirm it's actually useful day to day, then wire the reel_id linkage
+once there's real posted data to link against.
+
 ## Blocked on Adarsh
 
 1. **3–5 more ORGANIC losers.** The validation step for F-01 and F-02. Organic only — promoted
