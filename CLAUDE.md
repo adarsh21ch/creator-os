@@ -45,7 +45,11 @@ Full detail: `docs/01-architecture.md`. Screens: `docs/06-screens.md`.
 ## Stack (decided)
 
 - React + Vite + TypeScript + Tailwind
-- Supabase — Postgres, Auth, Edge Functions, pg_cron
+- Supabase — Postgres, Auth, Edge Functions, pg_cron. Lives in the shared **Nevorai Tools**
+  project (`wxgfaaaboftzsazknbvl`), in its own **`creator_os` schema** — not a dedicated project,
+  and not the `public` schema. `src/lib/supabase.ts` sets `db.schema: 'creator_os'`; any new table
+  goes in that schema, and any raw SQL/REST call must pass `Accept-Profile`/`Content-Profile:
+  creator_os` (supabase-js does this automatically once the client is configured this way).
 - Vercel hosting
 - **Both** AI providers: Gemini Flash for transcription + high-volume classification, Claude for
   Scriptwriter / Hook Writer / Pattern Analyst / Deep Research. Per-employee model override lives
@@ -89,9 +93,9 @@ Influencer Watch desk rather than writing it twice.
 
 ## Known security issue
 
-RLS is disabled on all 8 tables and the anon key is public (it ships in the client bundle).
-`supabase/migrations/0003_enable_rls.sql` is the fix, written but **not applied** — it needs
-Supabase Auth and a login screen landing at the same time. **Do not deploy before both are in.**
+RLS + the schema move are both handled by `supabase/migrations/0004_bootstrap_in_nevorai_tools.sql`,
+written but as of this writing **not yet run** — see STATUS.md "MOVED" section for the exact
+3-step sequence (run SQL → expose schema → create user). **Do not deploy before all 3 are done.**
 
 ## Where to start
 

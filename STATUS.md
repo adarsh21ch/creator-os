@@ -41,6 +41,27 @@ placeholder naming which phase it belongs to.
 - **Confound:** 2 of the 3 losers were paid promotions, so part of the gap may be cold
   distribution. l03 is organic and fits both formats, which is what keeps them standing.
 
+## MOVED — now inside Nevorai Tools (2026-09-20)
+
+Creator OS no longer has its own Supabase project. It lives in the **`creator_os` schema** inside
+the shared **Nevorai Tools** project (`wxgfaaaboftzsazknbvl`, ap-south-1), alongside whatever other
+Nevorai apps land there later — the schema boundary is what stops table-name collisions.
+
+`.env` and `src/lib/supabase.ts` already point at it (`db.schema: 'creator_os'`). Build passes.
+
+**One paste left to do it for real — `supabase/migrations/0004_bootstrap_in_nevorai_tools.sql`.**
+It is everything: schema, all 8 tables, RLS + policies, and the 7 seeded reels + brand brain,
+in one script. Run it once in the Nevorai Tools SQL Editor.
+
+**Then one dashboard click, not SQL:** Project Settings → API → Exposed schemas → add `creator_os`
+to the list (keep `public` too). Skipped, the app gets 404s — PostgREST won't serve a schema it
+doesn't know to expose.
+
+**Then create the login user** in this project's Authentication → Users (fresh project, no users
+yet) and sign in to verify.
+
+The old standalone project can be deleted once this is confirmed working.
+
 ## SECURITY BLOCKER — must be fixed before any deploy
 
 **Verified 2026-09-16: RLS is disabled on all 8 tables.** `VITE_SUPABASE_ANON_KEY` ships inside
@@ -50,20 +71,14 @@ can read every transcript and strategy note, and can wipe the database.
 
 Harmless right now because nothing is deployed. **It is a hard blocker on deploying.**
 
-**Auth is now built** (2026-09-16): `src/lib/auth.tsx` (AuthProvider + useAuth),
-`src/pages/Login.tsx` (email + password, no public sign-up), a gate in `App.tsx` that shows the
-login screen when there is no session, and a sign-out control in the sidebar. Build passes.
+**Auth is built** (2026-09-16): `src/lib/auth.tsx`, `src/pages/Login.tsx`, a route gate in
+`App.tsx`, sign-out in the sidebar. Build passes.
 
-`supabase/migrations/0003_enable_rls.sql` is still **NOT applied** — deliberately. Correct order,
-so Adarsh is never locked out:
-1. Create his user: Supabase dashboard → Authentication → Users → Add user (he sets the password).
-2. Run the app, sign in, confirm the screens still load.
-3. **Then** paste 0003 into the Supabase SQL editor.
+RLS is folded into migration 0004 (see "MOVED" above) and applies immediately on this project,
+since it is fresh and nothing depends on anon access yet — unlike the old project, there is no
+two-step dance needed here.
 
-If anything goes wrong, the Supabase dashboard table editor bypasses RLS, so the data is never
-unreachable.
-
-**Do not deploy to Vercel until 0003 has been applied and login verified.**
+**Do not deploy to Vercel until 0004 has been run, the schema exposed, and login verified.**
 
 ## Database is now seeded (2026-09-16)
 
