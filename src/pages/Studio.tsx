@@ -1,7 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { StudioSession } from '../types'
+
+// A stuck spinner with no feedback is worse than a slow one — this rejects
+// with a clear message instead of hanging forever if something goes wrong
+// upstream (a dropped connection, an edge function that never responds).
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`${label} took longer than ${ms / 1000}s and was cancelled — try again.`)),
+        ms,
+      ),
+    ),
+  ])
+}
+
+// Shows real elapsed seconds while a call is in flight, so "is it stuck?" has
+// a visible answer instead of a spinner that looks the same at 2s and 2min.
+function useElapsedSeconds(active: boolean): number {
+  const [seconds, setSeconds] = useState(0)
+  useEffect(() => {
+    if (!active) {
+      setSeconds(0)
+      return
+    }
+    const start = Date.now()
+    const id = setInterval(() => setSeconds(Math.floor((Date.now() - start) / 1000)), 1000)
+    return () => clearInterval(id)
+  }, [active])
+  return seconds
+}
 
 export function StudioPage() {
   const qc = useQueryClient()
@@ -72,9 +103,11 @@ export function StudioPage() {
 
   const genResearch = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('studio-generate', {
-        body: { action: 'research', topic },
-      })
+      const { data, error } = await withTimeout(
+        supabase.functions.invoke('studio-generate', { body: { action: 'research', topic } }),
+        60000,
+        'Research',
+      )
       if (error) throw error
       if (data?.error) throw new Error(data.error)
       return data.text as string
@@ -87,9 +120,13 @@ export function StudioPage() {
 
   const genHooks = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('studio-generate', {
-        body: { action: 'hooks', topic, research: researchText },
-      })
+      const { data, error } = await withTimeout(
+        supabase.functions.invoke('studio-generate', {
+          body: { action: 'hooks', topic, research: researchText },
+        }),
+        40000,
+        'Hook writing',
+      )
       if (error) throw error
       if (data?.error) throw new Error(data.error)
       return data.text as string
@@ -102,9 +139,13 @@ export function StudioPage() {
 
   const genScript = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('studio-generate', {
-        body: { action: 'script', topic, hook, research: researchText },
-      })
+      const { data, error } = await withTimeout(
+        supabase.functions.invoke('studio-generate', {
+          body: { action: 'script', topic, hook, research: researchText },
+        }),
+        40000,
+        'Script writing',
+      )
       if (error) throw error
       if (data?.error) throw new Error(data.error)
       return data.text as string
@@ -117,6 +158,9 @@ export function StudioPage() {
 
   const canResearch = topic.trim().length > 0
   const canWriteHooks = skipResearch ? canResearch : researchText.trim().length > 0
+  const researchSecs = useElapsedSeconds(genResearch.isPending)
+  const hooksSecs = useElapsedSeconds(genHooks.isPending)
+  const scriptSecs = useElapsedSeconds(genScript.isPending)
 
   return (
     <div className="max-w-3xl">
@@ -160,7 +204,7 @@ export function StudioPage() {
           disabled={genResearch.isPending || !canResearch}
           className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
         >
-          {genResearch.isPending ? 'Searching the web…' : 'Research this topic'}
+          {genResearch.isPending ? `Searching the web… ${researchSecs}s` : 'Research this topic'}
         </button>
         {genResearch.isError && (
           <p className="text-sm text-red-600">{(genResearch.error as Error).message}</p>
@@ -199,7 +243,7 @@ export function StudioPage() {
           disabled={genHooks.isPending || !canWriteHooks}
           className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
         >
-          {genHooks.isPending ? 'Writing hooks…' : 'Generate hooks'}
+          {genHooks.isPending ? `Writing hooks… ${hooksSecs}s` : 'Generate hooks'}
         </button>
         {genHooks.isError && (
           <p className="mt-2 text-sm text-red-600">{(genHooks.error as Error).message}</p>
@@ -229,7 +273,7 @@ export function StudioPage() {
             disabled={genScript.isPending || !hook.trim()}
             className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            {genScript.isPending ? 'Writing script…' : 'Generate script'}
+            {genScript.isPending ? `Writing script… ${scriptSecs}s` : 'Generate script'}
           </button>
           {genScript.isError && (
             <p className="text-sm text-red-600">{(genScript.error as Error).message}</p>

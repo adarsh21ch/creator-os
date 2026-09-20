@@ -188,7 +188,23 @@ with no error. Fixed: `max_tokens` raised to 8000, `max_uses` lowered to 3 (leav
 costs less per search), and every response path now fails loudly with the real `stop_reason`
 instead of silently returning empty text.
 
-**NOT DEPLOYED YET** — `supabase functions deploy studio-generate` needs to run again.
+**Deployed 2026-09-20**, verified: `_shared/cors.ts` appeared in the deploy output alongside
+the function, confirming the CORS fix built correctly.
+
+## Follow-up same day: Library AND Studio both hung with no error
+
+Right after redeploying, Library sat on "Loading…" and Studio's Research sat on "Searching the
+web…" simultaneously with no error either side — a strong signal it was the local dev server
+getting stuck (from a long session of repeated rebuilds), not two separate app bugs. Told Adarsh
+to restart `bun run dev` and hard-refresh as the first move, since two unrelated screens failing
+identically at the same moment rarely means two unrelated bugs.
+
+**Also fixed for real, regardless of that cause:** a stuck spinner with no feedback was a fair
+complaint on its own. Studio's three actions now: (1) time out client-side after 40-60s with a
+clear error instead of hanging forever if something upstream genuinely drops, and (2) show live
+elapsed seconds in the button label ("Searching the web… 14s") so "is it stuck?" always has a
+visible answer. Library doesn't have this yet — same pattern should be applied there if it
+recurs.
 
 ## Original design notes (superseded by "BUILT" above, kept for the reel_id follow-up)
 
