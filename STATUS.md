@@ -80,6 +80,25 @@ two-step dance needed here.
 
 **Do not deploy to Vercel until 0004 has been run, the schema exposed, and login verified.**
 
+**All three done and verified 2026-09-20** — schema exposed, login works, Library loads. Migration
+0004 is live in Nevorai Tools. Old standalone Supabase project is no longer used.
+
+## Two fixes made after go-live (2026-09-20)
+
+1. **Library page had no error state** — a failed fetch just hung on "Loading…" forever instead
+   of showing why. Fixed: now shows the real error message. Caught this because the first live
+   Library load appeared stuck (schema cache likely still catching up right after exposing
+   `creator_os` in the dashboard — refresh usually clears it; now if it doesn't, the error shows).
+2. **Settings can now save AI keys directly** — Adarsh asked for this. `app_settings` gained
+   `anthropic_api_key` / `gemini_api_key` text columns (migration 0005, additive only), behind the
+   same authenticated-only RLS as every other table. Settings screen has a masked input + Save per
+   key; once saved the value is never re-displayed, only "Set" / "Replace".
+   **Not consumed yet** — no AI employee exists to read it. Whoever builds Studio (Phase 2) should
+   read the key from this table server-side via the service_role key, not a separate Edge Function
+   secret. Comment left in 0005 saying exactly this.
+
+**Run 0005 the same way as 0004** — paste into the Nevorai Tools SQL Editor, run once.
+
 ## Database is now seeded (2026-09-16)
 
 - `reels`: **7 rows** — the 4 winners and 3 losers, with `is_organic` set correctly (l01 and l02

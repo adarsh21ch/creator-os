@@ -65,7 +65,7 @@ export function LibraryPage() {
     onError: (e: Error) => setIgStatus(e.message),
   })
 
-  const { data: reels, isLoading } = useQuery({
+  const { data: reels, isLoading, isError, error } = useQuery({
     queryKey: ['reels'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -75,6 +75,7 @@ export function LibraryPage() {
       if (error) throw error
       return data as Reel[]
     },
+    retry: 1, // fail fast and show the real error instead of hanging through backoff
   })
 
   const addReel = useMutation({
@@ -239,7 +240,12 @@ export function LibraryPage() {
       )}
 
       {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
-      {!isLoading && reels && reels.length === 0 && (
+      {isError && (
+        <p className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+          Could not load reels: {(error as Error).message}
+        </p>
+      )}
+      {!isLoading && !isError && reels && reels.length === 0 && (
         <p className="text-sm text-neutral-500">No reels yet. Add the first one above.</p>
       )}
       {reels && reels.length > 0 && (
