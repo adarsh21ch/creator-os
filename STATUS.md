@@ -99,6 +99,18 @@ two-step dance needed here.
 
 **Run 0005 the same way as 0004** — paste into the Nevorai Tools SQL Editor, run once.
 
+## Bug found live 2026-09-20: "permission denied for schema creator_os"
+
+0004 created the schema, tables, RLS and policies — but never granted `authenticated` USAGE on
+the schema itself, and never granted table-level SELECT/INSERT/UPDATE/DELETE. RLS restricts which
+*rows* a role sees once it's allowed into a schema; it doesn't grant entry. The built-in `public`
+schema comes pre-granted by Supabase's own bootstrap, which is why the old standalone project
+never needed this — a schema we create ourselves does not inherit that.
+
+**Fix: `supabase/migrations/0006_grant_schema_access.sql`.** Also sets default privileges so any
+table added in Phase 2+ gets the same access automatically, without needing a 0007 for the same
+mistake.
+
 ## Database is now seeded (2026-09-16)
 
 - `reels`: **7 rows** — the 4 winners and 3 losers, with `is_organic` set correctly (l01 and l02
