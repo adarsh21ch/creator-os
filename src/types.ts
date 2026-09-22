@@ -94,6 +94,23 @@ export type Employee = {
   created_at: string
 }
 
+export type Format = {
+  id: string
+  code: string
+  name: string
+  status: 'promoted' | 'killed' | 'watching'
+  description: string
+  scriptwriter_rule: string | null
+  evidence: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type ReelFormatRow = {
+  format_id: string
+  reels: Pick<Reel, 'id' | 'posted_at' | 'pillar' | 'is_organic' | 'views'>
+}
+
 export type StudioSession = {
   id: string
   topic: string

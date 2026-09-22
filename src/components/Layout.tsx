@@ -18,7 +18,7 @@ const groups: NavGroup[] = [
   {
     title: 'What you learn',
     items: [
-      { to: '/formats', label: 'Formats', phase1: false },
+      { to: '/formats', label: 'Formats', phase1: true },
       { to: '/library', label: 'Library', phase1: true },
       { to: '/performance', label: 'Performance', phase1: false },
     ],

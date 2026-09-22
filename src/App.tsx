@@ -4,6 +4,7 @@ import { Layout } from './components/Layout'
 import { AuthProvider, useAuth } from './lib/auth'
 import { LoginPage } from './pages/Login'
 import { BrandBrainPage } from './pages/BrandBrain'
+import { FormatsPage } from './pages/Formats'
 import { LaterPage } from './pages/Later'
 import { LibraryPage } from './pages/Library'
 import { NotFoundPage } from './pages/NotFound'
@@ -45,7 +46,7 @@ function Gate() {
             <Route path="ideas" element={<LaterPage />} />
             <Route path="studio" element={<StudioPage />} />
             <Route path="board" element={<LaterPage />} />
-            <Route path="formats" element={<LaterPage />} />
+            <Route path="formats" element={<FormatsPage />} />
             <Route path="library" element={<LibraryPage />} />
             <Route path="performance" element={<LaterPage />} />
             <Route path="watchlist" element={<WatchlistPage />} />

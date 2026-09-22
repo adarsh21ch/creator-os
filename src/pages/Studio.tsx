@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { StudioSession } from '../types'
+import type { Reel, StudioSession } from '../types'
 
 // A stuck spinner with no feedback is worse than a slow one — this rejects
 // with a clear message instead of hanging forever if something goes wrong
@@ -37,6 +37,7 @@ function useElapsedSeconds(active: boolean): number {
 export function StudioPage() {
   const qc = useQueryClient()
   const [sessionId, setSessionId] = useState<string | null>(null)
+  const [linkingSessionId, setLinkingSessionId] = useState<string | null>(null)
   const [topic, setTopic] = useState('')
   const [hook, setHook] = useState('')
   const [researchText, setResearchText] = useState('')
@@ -75,6 +76,33 @@ export function StudioPage() {
         .limit(20)
       if (error) throw error
       return data as StudioSession[]
+    },
+  })
+
+  // For the "mark as posted" picker on each history row — just enough per reel to
+  // recognize which one it is, not the full Library shape.
+  const reels = useQuery({
+    queryKey: ['reels_for_linking'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reels')
+        .select('id, posted_at, pillar, transcript, is_organic, created_at')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (error) throw error
+      return data as Pick<Reel, 'id' | 'posted_at' | 'pillar' | 'transcript' | 'is_organic' | 'created_at'>[]
+    },
+    enabled: linkingSessionId !== null,
+  })
+
+  const linkReel = useMutation({
+    mutationFn: async ({ sessionId: sid, reelId }: { sessionId: string; reelId: string | null }) => {
+      const { error } = await supabase.from('studio_sessions').update({ reel_id: reelId }).eq('id', sid)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studio_sessions'] })
+      setLinkingSessionId(null)
     },
   })
 
@@ -307,31 +335,98 @@ export function StudioPage() {
           </p>
         )}
         <div className="mt-3 space-y-2">
-          {history.data?.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => loadSession(s)}
-              className={`block w-full rounded-md border p-3 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 ${
-                s.id === sessionId
-                  ? 'border-purple-400 bg-purple-50 dark:border-purple-700 dark:bg-purple-900/20'
-                  : 'border-neutral-200 dark:border-neutral-800'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="truncate font-medium">{s.topic}</span>
-                <span className="shrink-0 text-xs text-neutral-500">
-                  {new Date(s.updated_at).toLocaleDateString()}
-                </span>
+          {history.data?.map((s) => {
+            const linkedReel = s.reel_id ? reels.data?.find((r) => r.id === s.reel_id) : null
+            return (
+              <div
+                key={s.id}
+                className={`rounded-md border p-3 text-sm ${
+                  s.id === sessionId
+                    ? 'border-purple-400 bg-purple-50 dark:border-purple-700 dark:bg-purple-900/20'
+                    : 'border-neutral-200 dark:border-neutral-800'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => loadSession(s)}
+                  className="block w-full text-left hover:opacity-80"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="truncate font-medium">{s.topic}</span>
+                    <span className="shrink-0 text-xs text-neutral-500">
+                      {new Date(s.updated_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex gap-3 text-xs text-neutral-500">
+                    <span>{s.research_text ? '✓ research' : '— research'}</span>
+                    <span>{s.hooks_text ? '✓ hooks' : '— hooks'}</span>
+                    <span>{s.script_text ? '✓ script' : '— script'}</span>
+                    <span>
+                      {s.reel_id
+                        ? `✓ posted${linkedReel ? ` — ${linkedReel.pillar ?? 'reel'} ${linkedReel.posted_at ?? ''}` : ''}`
+                        : '— not posted'}
+                    </span>
+                  </div>
+                </button>
+
+                <div className="mt-2 flex items-center gap-2 border-t border-neutral-100 pt-2 dark:border-neutral-800">
+                  {s.reel_id ? (
+                    <button
+                      type="button"
+                      onClick={() => linkReel.mutate({ sessionId: s.id, reelId: null })}
+                      disabled={linkReel.isPending}
+                      className="text-xs text-neutral-500 underline hover:text-neutral-700 disabled:opacity-50 dark:hover:text-neutral-300"
+                    >
+                      Unlink
+                    </button>
+                  ) : linkingSessionId === s.id ? (
+                    <>
+                      <select
+                        defaultValue=""
+                        disabled={reels.isLoading || linkReel.isPending}
+                        onChange={(e) => {
+                          if (e.target.value) linkReel.mutate({ sessionId: s.id, reelId: e.target.value })
+                        }}
+                        className="flex-1 rounded-md border border-neutral-300 p-1.5 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+                      >
+                        <option value="" disabled>
+                          {reels.isLoading ? 'Loading reels…' : 'Pick the reel you posted'}
+                        </option>
+                        {reels.data?.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {(r.posted_at ?? 'no date') +
+                              ' — ' +
+                              (r.pillar ?? 'untitled') +
+                              ' — ' +
+                              r.transcript.slice(0, 40).replace(/\s+/g, ' ') +
+                              '…'}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setLinkingSessionId(null)}
+                        className="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setLinkingSessionId(s.id)}
+                      className="text-xs text-purple-700 underline hover:text-purple-900 dark:text-purple-300 dark:hover:text-purple-100"
+                    >
+                      Mark as posted →
+                    </button>
+                  )}
+                  {linkReel.isError && linkingSessionId === s.id && (
+                    <span className="text-xs text-red-600">{(linkReel.error as Error).message}</span>
+                  )}
+                </div>
               </div>
-              <div className="mt-1 flex gap-3 text-xs text-neutral-500">
-                <span>{s.research_text ? '✓ research' : '— research'}</span>
-                <span>{s.hooks_text ? '✓ hooks' : '— hooks'}</span>
-                <span>{s.script_text ? '✓ script' : '— script'}</span>
-                <span>{s.reel_id ? '✓ posted' : '— not posted'}</span>
-              </div>
-            </button>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>
