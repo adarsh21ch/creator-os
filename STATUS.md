@@ -1,6 +1,6 @@
 # STATUS — the resume point
 
-_Last updated: 2026-09-16_
+_Last updated: 2026-09-22_
 
 ## Where we are
 
@@ -233,6 +233,14 @@ anything scriptable found so far; it's a dashboard-only toggle. This is the high
 open item in the whole project — every RLS policy here assumes "authenticated = Adarsh," and
 that assumption is false while this stays on.
 
+**Re-confirmed 2026-09-22, still open.** Checked directly via the project's public
+`/auth/v1/settings` endpoint (read-only, no user created) — `disable_signup: false`. Not fixed
+yet as of this session; still needs Adarsh in the dashboard.
+
+**Also deployed this session:** the research-timeout fix (effort lowered to `low`, client
+timeout raised to 120s) that was written 2026-09-20 but never pushed — `supabase functions
+deploy studio-generate` run 2026-09-22, confirmed in the deploy output.
+
 **Worth a quick independent check, lower priority:** confirm Vercel's project settings have
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` set to the Nevorai Tools values. The live site
 working is decent evidence they're already correct, but this was not independently confirmed
@@ -292,6 +300,29 @@ needs no new grant statements).
 **Scope note:** don't build the full Performance rollup in the same pass — land the persistence
 and History view first, confirm it's actually useful day to day, then wire the reel_id linkage
 once there's real posted data to link against.
+
+## Formats screen + Studio → Library link — BUILT 2026-09-22
+
+Both were the top two priorities for this session.
+
+**Formats screen** (`src/pages/Formats.tsx`, migration `0008_formats.sql`): new `formats` +
+`reel_formats` tables (many-to-many, not the unused `reels.format_id` column, because all 4
+winners in the sample fit *both* F-01 and F-02 at once — a single FK couldn't represent that).
+Seeded with F-01 Named Living Villain, F-02 Stake On The Viewer (both promoted, with the
+Scriptwriter rule text from `docs/04-formats.md`), plus H-01 and H-02 (killed, kept visible so
+nobody re-derives them). The 4 winning reels are auto-tagged in the seed migration itself,
+matched by their existing unique `notes` text — no manual re-entry needed. Now in the nav as a
+real Phase-1 screen, not a "later" placeholder.
+
+**Studio → Library link**: every row in Studio's History list now has a "Mark as posted →"
+control. Click it, pick the Library reel from a dropdown (shows date, pillar, and a transcript
+snippet), and `studio_sessions.reel_id` gets set. One-click Unlink if picked wrong. This is
+exactly the design queued in STATUS.md's "Original design notes" section below — implemented
+as specified.
+
+**Not yet run**: `supabase/migrations/0008_formats.sql`. Frontend code is deployed to Vercel
+(pushed to `main`), but the Formats screen will show "No formats yet" until this migration is
+pasted into the Nevorai Tools SQL Editor — see "WHAT YOU DO NEXT" for the exact paste.
 
 ## Blocked on Adarsh
 
