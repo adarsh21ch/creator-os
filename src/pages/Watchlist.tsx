@@ -1,7 +1,58 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { WatchlistAccount } from '../types'
+import type { WatchlistAccount, WatchlistPost } from '../types'
+
+function AccountPosts({ accountId }: { accountId: string }) {
+  const posts = useQuery({
+    queryKey: ['watchlist_posts', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('watchlist_posts')
+        .select('*')
+        .eq('account_id', accountId)
+        .order('posted_at', { ascending: false })
+        .limit(10)
+      if (error) throw error
+      return data as WatchlistPost[]
+    },
+  })
+
+  if (posts.isLoading) return <p className="mt-2 text-xs text-neutral-500">Loading posts…</p>
+  if (posts.isError) return <p className="mt-2 text-xs text-red-600">{(posts.error as Error).message}</p>
+  if (!posts.data || posts.data.length === 0) {
+    return (
+      <p className="mt-2 text-xs text-neutral-500">
+        Nothing scraped yet — the daily Influencer Watch run fills this in, or log a link above.
+      </p>
+    )
+  }
+
+  return (
+    <ul className="mt-2 space-y-1">
+      {posts.data.map((p) => (
+        <li key={p.id} className="flex items-center justify-between gap-2 text-xs">
+          <a
+            href={p.post_url}
+            target="_blank"
+            rel="noreferrer"
+            className="truncate text-neutral-600 hover:underline dark:text-neutral-400"
+          >
+            {p.posted_at ?? 'no date'} — {p.caption?.slice(0, 50) ?? p.post_url}
+          </a>
+          <span className="shrink-0 flex items-center gap-1">
+            {p.is_outlier && (
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                {p.outlier_ratio ? `${p.outlier_ratio.toFixed(1)}×` : 'outlier'}
+              </span>
+            )}
+            <span className="text-neutral-500">{p.views != null ? `${p.views.toLocaleString()} views` : '—'}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 function IngestPostForm({ accountId }: { accountId: string }) {
   const qc = useQueryClient()
@@ -159,7 +210,12 @@ export function WatchlistPage() {
                   {acc.active ? 'Active' : 'Paused'}
                 </button>
               </div>
-              {expanded === acc.id && <IngestPostForm accountId={acc.id} />}
+              {expanded === acc.id && (
+                <>
+                  <IngestPostForm accountId={acc.id} />
+                  <AccountPosts accountId={acc.id} />
+                </>
+              )}
             </li>
           ))}
         </ul>

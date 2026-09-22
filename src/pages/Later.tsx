@@ -2,7 +2,6 @@ import { useLocation } from 'react-router-dom'
 import { ComingLater } from '../components/ComingLater'
 
 const screenNames: Record<string, { screen: string; phase: string }> = {
-  '/': { screen: 'Today', phase: 'Phase 3 (Manager + daily brief)' },
   '/ideas': { screen: 'Ideas', phase: 'Phase 3 (Intelligence desk)' },
   '/studio': { screen: 'Studio', phase: 'Phase 2 (Creative desk)' },
   '/board': { screen: 'Board', phase: 'Phase 5 (Production desk)' },

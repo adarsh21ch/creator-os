@@ -68,6 +68,8 @@ export type WatchlistPost = {
   views: number | null
   likes: number | null
   comments: number | null
+  is_outlier: boolean
+  outlier_ratio: number | null
   fetched_at: string
 }
 

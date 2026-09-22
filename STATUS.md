@@ -324,6 +324,50 @@ as specified.
 (pushed to `main`), but the Formats screen will show "No formats yet" until this migration is
 pasted into the Nevorai Tools SQL Editor — see "WHAT YOU DO NEXT" for the exact paste.
 
+## Intelligence Desk automation + production hardening — BUILT 2026-09-22
+
+Requested this session: "build the next phase" + "I want app production ready." Verified the
+signup toggle live via `/auth/v1/settings` after Adarsh's dashboard fix — **`disable_signup: true`
+confirmed, security blocker is closed.**
+
+**Two real gaps found before building anything new:**
+1. `fetch-rss` (News Desk) existed and worked but was **never scheduled** — the "pulled nightly
+   at 2am" copy on the Sources screen was aspirational, not real.
+2. **`APIFY_API_TOKEN` was never set** as an Edge Function secret in Nevorai Tools — confirmed via
+   `supabase secrets list` (the project has secrets for other Nevorai apps, none for Apify/IG).
+   This means every "paste a link" ingestion on Library and Watchlist has been silently failing
+   with "APIFY_API_TOKEN is not set" this whole time.
+
+**Built:**
+- **Influencer Watch** (`supabase/functions/scrape-watchlist`, lifted from
+  `~/above1million`'s scrape-reels per CLAUDE.md's reuse instruction, same Apify actor
+  `apify~instagram-scraper` that `ingest-instagram` already uses — one actor, not two). Pulls
+  recent posts for every active Watchlist account, upserts into `watchlist_posts`, then flags
+  outliers at **≥3× that account's own trailing-30-day median views** — never an absolute
+  threshold, matching the rule already promised in the Watchlist screen's copy.
+- **Migration `0009_intelligence_desk_automation.sql`**: adds `is_outlier` / `outlier_ratio` to
+  `watchlist_posts`, and schedules both desks via `cron.schedule` + `net.http_post` —
+  `fetch-rss` nightly at 02:00 IST, `scrape-watchlist` daily at 08:30 IST. **Has two placeholders
+  (`<PROJECT_REF>`, `<SERVICE_ROLE_KEY>`) that must be filled in the SQL Editor before running —
+  never commit the filled-in version, the service_role key bypasses every RLS policy.**
+- **Watchlist screen**: expanding an account now shows its 10 most recent scraped posts with an
+  outlier badge (e.g. "4.2×") instead of just the manual-log form.
+- **Today screen** (was a placeholder): shows outlier posts across the whole Watchlist, sorted by
+  ratio, plus the 10 latest headlines from Sources. No AI Manager narrating it yet — this is the
+  raw feed version; an AI-written daily brief is the natural next step once this proves useful.
+- **Error boundary** (`src/components/ErrorBoundary.tsx`): one broken screen no longer blanks the
+  whole app — shows what broke and a way back to Today.
+- **Confirmed via `vercel env ls production`**: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+  are correctly set on Vercel. Closes the "not independently confirmed" item from the 2026-09-22
+  audit.
+
+**Not deployed yet — needs Adarsh:**
+1. Run `0009_intelligence_desk_automation.sql` in the SQL Editor, with both placeholders filled.
+2. Set `APIFY_API_TOKEN` (and optionally `WATCHLIST_RESULTS_PER_ACCOUNT`, default 5) as Edge
+   Function secrets — `supabase secrets set APIFY_API_TOKEN=xxx` from this machine, or via the
+   dashboard. Until this is set, `scrape-watchlist` runs on schedule but returns a clean 400 each
+   time — harmless, just an empty run in `cron.job_run_details`.
+
 ## Blocked on Adarsh
 
 1. **3–5 more ORGANIC losers.** The validation step for F-01 and F-02. Organic only — promoted

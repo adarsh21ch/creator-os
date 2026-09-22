@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HashRouter, Route, Routes } from 'react-router-dom'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Layout } from './components/Layout'
 import { AuthProvider, useAuth } from './lib/auth'
 import { LoginPage } from './pages/Login'
@@ -11,6 +12,7 @@ import { NotFoundPage } from './pages/NotFound'
 import { SettingsPage } from './pages/Settings'
 import { SourcesPage } from './pages/Sources'
 import { StudioPage } from './pages/Studio'
+import { TodayPage } from './pages/Today'
 import { WatchlistPage } from './pages/Watchlist'
 
 const queryClient = new QueryClient()
@@ -18,9 +20,11 @@ const queryClient = new QueryClient()
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Gate />
-      </AuthProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <Gate />
+        </AuthProvider>
+      </ErrorBoundary>
     </QueryClientProvider>
   )
 }
@@ -42,7 +46,7 @@ function Gate() {
     <HashRouter>
         <Routes>
           <Route element={<Layout />}>
-            <Route index element={<LaterPage />} />
+            <Route index element={<TodayPage />} />
             <Route path="ideas" element={<LaterPage />} />
             <Route path="studio" element={<StudioPage />} />
             <Route path="board" element={<LaterPage />} />
