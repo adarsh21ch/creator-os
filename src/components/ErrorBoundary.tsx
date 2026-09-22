@@ -16,17 +16,17 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-8 dark:bg-neutral-950">
-          <div className="max-w-md rounded-lg border border-red-300 bg-red-50 p-6 text-sm dark:border-red-800 dark:bg-red-950/40">
-            <p className="font-medium text-red-800 dark:text-red-300">Something broke on this screen.</p>
-            <p className="mt-2 text-red-700 dark:text-red-400">{this.state.error.message}</p>
+        <div className="flex min-h-screen items-center justify-center bg-canvas p-8 text-white">
+          <div className="max-w-md rounded-2xl border border-red-500/25 bg-red-500/10 p-6 text-sm shadow-card">
+            <p className="font-medium text-red-300">Something broke on this screen.</p>
+            <p className="mt-2 text-red-400/80">{this.state.error.message}</p>
             <button
               type="button"
               onClick={() => {
                 this.setState({ error: null })
                 window.location.hash = '#/'
               }}
-              className="mt-4 rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+              className="mt-4 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-400"
             >
               Back to Today
             </button>

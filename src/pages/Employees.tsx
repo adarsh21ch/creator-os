@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Badge, Button, Card, Input, PageHeader, Select, Textarea } from '../components/ui/primitives'
 import type { Employee } from '../types'
 
 const DESK_LABEL: Record<Employee['desk'], string> = {
@@ -56,14 +57,14 @@ function EmployeeRow({ employee }: { employee: Employee }) {
   })
 
   return (
-    <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
+    <Card className="p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <span className="font-mono text-xs text-neutral-400">{employee.code}</span>{' '}
-          <span className="font-medium">{employee.name}</span>
+          <span className="font-mono text-xs text-white/30">{employee.code}</span>{' '}
+          <span className="font-medium text-white">{employee.name}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="text-xs text-neutral-500">
+          <span className="text-xs text-white/40">
             {employee.provider}
             {employee.model ? ` · ${employee.model}` : ''}
           </span>
@@ -71,29 +72,25 @@ function EmployeeRow({ employee }: { employee: Employee }) {
             type="button"
             onClick={() => toggleEnabled.mutate()}
             disabled={toggleEnabled.isPending}
-            className={`rounded px-2 py-0.5 text-xs font-medium disabled:opacity-50 ${
+            className={`rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-50 ${
               employee.enabled
-                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-900'
+                ? 'border border-emerald-500/25 bg-emerald-500/15 text-emerald-300'
+                : 'border border-white/10 bg-white/5 text-white/40'
             }`}
           >
             {employee.enabled ? 'Enabled' : 'Disabled'}
           </button>
-          <button
-            type="button"
-            onClick={() => setEditing((v) => !v)}
-            className="rounded-md border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
-          >
+          <Button variant="secondary" onClick={() => setEditing((v) => !v)} className="px-2 py-1 text-[11px]">
             {editing ? 'Close' : 'Edit'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {!editing && employee.prompt && (
-        <p className="mt-2 line-clamp-2 text-xs text-neutral-500">{employee.prompt}</p>
+        <p className="mt-2 line-clamp-2 text-xs text-white/40">{employee.prompt}</p>
       )}
       {!editing && employee.schedule && (
-        <p className="mt-1 text-xs text-neutral-400">cron: {employee.schedule}</p>
+        <p className="mt-1 text-xs text-white/25">cron: {employee.schedule}</p>
       )}
 
       {editing && (
@@ -104,52 +101,39 @@ function EmployeeRow({ employee }: { employee: Employee }) {
           }}
           className="mt-3 space-y-2"
         >
-          <input
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="Name"
-            className="w-full rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          />
-          <textarea
+          <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Name" />
+          <Textarea
             value={form.prompt}
             onChange={(e) => setForm({ ...form, prompt: e.target.value })}
             rows={4}
             placeholder="Prompt / instructions"
-            className="w-full rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
           />
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <select
+            <Select
               value={form.provider}
               onChange={(e) => setForm({ ...form, provider: e.target.value as 'anthropic' | 'gemini' })}
-              className="rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             >
               <option value="anthropic">Anthropic</option>
               <option value="gemini">Gemini</option>
-            </select>
-            <input
+            </Select>
+            <Input
               value={form.model}
               onChange={(e) => setForm({ ...form, model: e.target.value })}
               placeholder="Model override"
-              className="rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             />
-            <input
+            <Input
               value={form.schedule}
               onChange={(e) => setForm({ ...form, schedule: e.target.value })}
               placeholder="cron schedule"
-              className="rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             />
           </div>
-          <button
-            type="submit"
-            disabled={save.isPending}
-            className="rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={save.isPending} className="text-xs">
             {save.isPending ? 'Saving…' : 'Save'}
-          </button>
-          {save.isError && <p className="text-xs text-red-600">{(save.error as Error).message}</p>}
+          </Button>
+          {save.isError && <p className="text-xs text-red-400">{(save.error as Error).message}</p>}
         </form>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -193,19 +177,27 @@ export function EmployeesPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-xl font-semibold">Employees</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        The AI staff, one row each — not code files. Change a prompt, model, or schedule here and
-        it takes effect immediately, no deploy needed. "Enabled" means the desk actually has a
-        working call behind it right now; disabled ones are staffed but not built yet.
-      </p>
+      <PageHeader
+        title="Employees"
+        description={
+          <>
+            The AI staff, one row each — not code files. Change a prompt, model, or schedule here
+            and it takes effect immediately, no deploy needed.{' '}
+            <Badge variant="success" className="align-middle">
+              Enabled
+            </Badge>{' '}
+            means the desk actually has a working call behind it right now; disabled ones are
+            staffed but not built yet.
+          </>
+        }
+      />
 
-      {employees.isLoading && <p className="mt-6 text-sm text-neutral-500">Loading…</p>}
+      {employees.isLoading && <p className="mt-6 text-sm text-white/40">Loading…</p>}
       {employees.isError && (
-        <p className="mt-6 text-sm text-red-600">{(employees.error as Error).message}</p>
+        <p className="mt-6 text-sm text-red-400">{(employees.error as Error).message}</p>
       )}
       {employees.data && employees.data.length === 0 && (
-        <p className="mt-6 text-sm text-neutral-500">
+        <p className="mt-6 text-sm text-white/40">
           No employees yet — run migration 0010 in the SQL Editor to hire the initial 14.
         </p>
       )}
@@ -213,7 +205,7 @@ export function EmployeesPage() {
       <div className="mt-6 space-y-8">
         {grouped.map((g) => (
           <section key={g.desk}>
-            <h2 className="mb-2 text-sm font-semibold text-neutral-500">{DESK_LABEL[g.desk]}</h2>
+            <h2 className="mb-2 text-sm font-semibold text-white/50">{DESK_LABEL[g.desk]}</h2>
             <div className="space-y-2">
               {g.items.map((e) => (
                 <EmployeeRow key={e.id} employee={e} />
@@ -228,40 +220,32 @@ export function EmployeesPage() {
           e.preventDefault()
           if (newCode.trim() && newName.trim()) addEmployee.mutate()
         }}
-        className="mt-10 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-neutral-300 p-4 dark:border-neutral-700"
+        className="mt-10 flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-border-subtle p-4"
       >
-        <input
+        <Input
           placeholder="Code (e.g. C-05)"
           value={newCode}
           onChange={(e) => setNewCode(e.target.value)}
-          className="w-32 rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="w-32"
         />
-        <input
+        <Input
           placeholder="Name"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          className="min-w-[10rem] flex-1 rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="min-w-[10rem] flex-1"
         />
-        <select
-          value={newDesk}
-          onChange={(e) => setNewDesk(e.target.value as Employee['desk'])}
-          className="rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-        >
+        <Select value={newDesk} onChange={(e) => setNewDesk(e.target.value as Employee['desk'])}>
           {DESK_ORDER.map((d) => (
             <option key={d} value={d}>
               {DESK_LABEL[d]}
             </option>
           ))}
-        </select>
-        <button
-          type="submit"
-          disabled={addEmployee.isPending}
-          className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-        >
+        </Select>
+        <Button type="submit" disabled={addEmployee.isPending}>
           Hire
-        </button>
+        </Button>
         {addEmployee.isError && (
-          <p className="w-full text-xs text-red-600">{(addEmployee.error as Error).message}</p>
+          <p className="w-full text-xs text-red-400">{(addEmployee.error as Error).message}</p>
         )}
       </form>
     </div>

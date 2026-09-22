@@ -1,15 +1,60 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --color-accent: #aa3bff;
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Lexend", "Inter", system-ui, sans-serif;
+
+  /* Brand accent — violet, richer than stock Tailwind purple */
+  --color-accent-50: #f5f1ff;
+  --color-accent-100: #ede5ff;
+  --color-accent-200: #d9caff;
+  --color-accent-300: #bda1ff;
+  --color-accent-400: #9c6dff;
+  --color-accent-500: #8b3ffb;
+  --color-accent-600: #7a24ef;
+  --color-accent-700: #6716cf;
+  --color-accent-800: #5514a8;
+  --color-accent-900: #451286;
+  --color-accent-950: #2b0759;
+
+  /* Near-black surfaces for a deliberately dark, premium dashboard feel */
+  --color-canvas: #08070b;
+  --color-surface: #0f0d15;
+  --color-surface-raised: #161320;
+  --color-border-subtle: #221f2e;
+  --color-border: #2c2838;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --shadow-glow: 0 0 0 1px rgba(139, 63, 251, 0.4), 0 8px 24px -8px rgba(139, 63, 251, 0.5);
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: #f4f2f8;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-accent-500);
+  color: white;
+}
+
+/* Thin, unobtrusive scrollbars to match the dark premium surface */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 8px;
 }

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { Button, Card, PageHeader, Select, Textarea } from '../components/ui/primitives'
 import type { Reel, StudioSession } from '../types'
 
 // A stuck spinner with no feedback is worse than a slow one — this rejects
@@ -197,30 +198,23 @@ export function StudioPage() {
 
   return (
     <div className="max-w-3xl">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Studio</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Topic → real sources → hooks in your formula → a full script in your voice — reading
-            from the Brand Brain you've already set up. Every step is saved as you go.
-          </p>
-        </div>
-        {sessionId && (
-          <button
-            type="button"
-            onClick={newSession}
-            className="shrink-0 rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
-          >
-            + New topic
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Studio"
+        description="Topic → real sources → hooks in your formula → a full script in your voice — reading from the Brand Brain you've already set up. Every step is saved as you go."
+        actions={
+          sessionId && (
+            <Button variant="secondary" onClick={newSession} className="text-xs">
+              + New topic
+            </Button>
+          )
+        }
+      />
 
       <div className="mt-6 space-y-2">
-        <label htmlFor="topic" className="text-sm font-medium">
+        <label htmlFor="topic" className="text-sm font-medium text-white/70">
           Topic
         </label>
-        <textarea
+        <Textarea
           id="topic"
           rows={2}
           placeholder="What's today's reel about?"
@@ -229,28 +223,22 @@ export function StudioPage() {
             if (sessionId) newSession()
             setTopic(e.target.value)
           }}
-          className="w-full rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
         />
-        <button
-          type="button"
-          onClick={() => genResearch.mutate()}
-          disabled={genResearch.isPending || !canResearch}
-          className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-        >
+        <Button onClick={() => genResearch.mutate()} disabled={genResearch.isPending || !canResearch}>
           {genResearch.isPending ? `Searching the web… ${researchSecs}s` : 'Research this topic'}
-        </button>
+        </Button>
         {genResearch.isError && (
-          <p className="text-sm text-red-600">{(genResearch.error as Error).message}</p>
+          <p className="text-sm text-red-400">{(genResearch.error as Error).message}</p>
         )}
       </div>
 
       {researchText && (
         <div className="mt-6 space-y-2">
-          <h2 className="text-sm font-semibold">Sources — check these before you shoot</h2>
-          <pre className="whitespace-pre-wrap rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950/40">
-            {researchText}
-          </pre>
-          <p className="text-xs text-neutral-500">
+          <h2 className="text-sm font-semibold text-white/70">Sources — check these before you shoot</h2>
+          <Card className="border-amber-500/25 bg-amber-500/[0.06] p-4">
+            <pre className="whitespace-pre-wrap font-sans text-sm text-amber-100/90">{researchText}</pre>
+          </Card>
+          <p className="text-xs text-white/30">
             Hooks and the script below are instructed to use only what's written here — nothing
             else. Click the links and confirm before you say anything specific on camera.
           </p>
@@ -258,11 +246,12 @@ export function StudioPage() {
       )}
 
       {!researchText && (
-        <label className="mt-3 flex items-center gap-2 text-xs text-neutral-500">
+        <label className="mt-3 flex items-center gap-2 text-xs text-white/40">
           <input
             type="checkbox"
             checked={skipResearch}
             onChange={(e) => setSkipResearch(e.target.checked)}
+            className="accent-accent-500"
           />
           Skip research for this one (hooks will stay general — no invented facts, numbers, or
           names, but nothing specific either)
@@ -270,27 +259,22 @@ export function StudioPage() {
       )}
 
       <div className="mt-6">
-        <button
-          type="button"
-          onClick={() => genHooks.mutate()}
-          disabled={genHooks.isPending || !canWriteHooks}
-          className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-        >
+        <Button onClick={() => genHooks.mutate()} disabled={genHooks.isPending || !canWriteHooks}>
           {genHooks.isPending ? `Writing hooks… ${hooksSecs}s` : 'Generate hooks'}
-        </button>
+        </Button>
         {genHooks.isError && (
-          <p className="mt-2 text-sm text-red-600">{(genHooks.error as Error).message}</p>
+          <p className="mt-2 text-sm text-red-400">{(genHooks.error as Error).message}</p>
         )}
       </div>
 
       {hooksText && (
         <div className="mt-6 space-y-2">
-          <h2 className="text-sm font-semibold">Hooks</h2>
-          <pre className="whitespace-pre-wrap rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm dark:border-neutral-800 dark:bg-neutral-900">
-            {hooksText}
-          </pre>
+          <h2 className="text-sm font-semibold text-white/70">Hooks</h2>
+          <Card className="p-4">
+            <pre className="whitespace-pre-wrap font-sans text-sm text-white/80">{hooksText}</pre>
+          </Card>
 
-          <label htmlFor="hook" className="mt-4 block text-sm font-medium">
+          <label htmlFor="hook" className="mt-4 block text-sm font-medium text-white/70">
             Paste the hook you're going with
           </label>
           <input
@@ -298,43 +282,38 @@ export function StudioPage() {
             value={hook}
             onChange={(e) => setHook(e.target.value)}
             placeholder="Copy one line from above"
-            className="w-full rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition-colors focus:border-accent-500/60 focus:ring-2 focus:ring-accent-500/20"
           />
-          <button
-            type="button"
-            onClick={() => genScript.mutate()}
-            disabled={genScript.isPending || !hook.trim()}
-            className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-          >
+          <Button onClick={() => genScript.mutate()} disabled={genScript.isPending || !hook.trim()}>
             {genScript.isPending ? `Writing script… ${scriptSecs}s` : 'Generate script'}
-          </button>
+          </Button>
           {genScript.isError && (
-            <p className="text-sm text-red-600">{(genScript.error as Error).message}</p>
+            <p className="text-sm text-red-400">{(genScript.error as Error).message}</p>
           )}
         </div>
       )}
 
       {scriptText && (
         <div className="mt-6 space-y-2">
-          <h2 className="text-sm font-semibold">Script</h2>
-          <pre className="whitespace-pre-wrap rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm dark:border-neutral-800 dark:bg-neutral-900">
-            {scriptText}
-          </pre>
-          <p className="text-xs text-neutral-500">
+          <h2 className="text-sm font-semibold text-white/70">Script</h2>
+          <Card className="p-4">
+            <pre className="whitespace-pre-wrap font-sans text-sm text-white/80">{scriptText}</pre>
+          </Card>
+          <p className="text-xs text-white/30">
             Saved to History automatically. Once you've shot it, add the real numbers in the
             Library too — that's what teaches the Pattern Analyst later.
           </p>
         </div>
       )}
 
-      <div className="mt-10 border-t border-neutral-200 pt-6 dark:border-neutral-800">
-        <h2 className="text-sm font-semibold">History</h2>
-        {history.isLoading && <p className="mt-2 text-sm text-neutral-500">Loading…</p>}
+      <div className="mt-10 border-t border-border-subtle pt-6">
+        <h2 className="text-sm font-semibold text-white/70">History</h2>
+        {history.isLoading && <p className="mt-2 text-sm text-white/40">Loading…</p>}
         {history.isError && (
-          <p className="mt-2 text-sm text-red-600">{(history.error as Error).message}</p>
+          <p className="mt-2 text-sm text-red-400">{(history.error as Error).message}</p>
         )}
         {history.data && history.data.length === 0 && (
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-white/40">
             Nothing yet — your first topic above will show up here once you research or write
             hooks for it.
           </p>
@@ -343,13 +322,9 @@ export function StudioPage() {
           {history.data?.map((s) => {
             const linkedReel = s.reel_id ? reels.data?.find((r) => r.id === s.reel_id) : null
             return (
-              <div
+              <Card
                 key={s.id}
-                className={`rounded-md border p-3 text-sm ${
-                  s.id === sessionId
-                    ? 'border-purple-400 bg-purple-50 dark:border-purple-700 dark:bg-purple-900/20'
-                    : 'border-neutral-200 dark:border-neutral-800'
-                }`}
+                className={`p-3 text-sm ${s.id === sessionId ? 'border-accent-500/40 bg-accent-500/[0.06]' : ''}`}
               >
                 <button
                   type="button"
@@ -357,12 +332,12 @@ export function StudioPage() {
                   className="block w-full text-left hover:opacity-80"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="truncate font-medium">{s.topic}</span>
-                    <span className="shrink-0 text-xs text-neutral-500">
+                    <span className="truncate font-medium text-white">{s.topic}</span>
+                    <span className="shrink-0 text-xs text-white/40">
                       {new Date(s.updated_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="mt-1 flex gap-3 text-xs text-neutral-500">
+                  <div className="mt-1 flex flex-wrap gap-3 text-xs text-white/40">
                     <span>{s.research_text ? '✓ research' : '— research'}</span>
                     <span>{s.hooks_text ? '✓ hooks' : '— hooks'}</span>
                     <span>{s.script_text ? '✓ script' : '— script'}</span>
@@ -374,25 +349,25 @@ export function StudioPage() {
                   </div>
                 </button>
 
-                <div className="mt-2 flex items-center gap-2 border-t border-neutral-100 pt-2 dark:border-neutral-800">
+                <div className="mt-2 flex items-center gap-2 border-t border-border-subtle pt-2">
                   {s.reel_id ? (
                     <button
                       type="button"
                       onClick={() => linkReel.mutate({ sessionId: s.id, reelId: null })}
                       disabled={linkReel.isPending}
-                      className="text-xs text-neutral-500 underline hover:text-neutral-700 disabled:opacity-50 dark:hover:text-neutral-300"
+                      className="text-xs text-white/40 underline hover:text-white/70 disabled:opacity-50"
                     >
                       Unlink
                     </button>
                   ) : linkingSessionId === s.id ? (
                     <>
-                      <select
+                      <Select
                         defaultValue=""
                         disabled={reels.isLoading || linkReel.isPending}
                         onChange={(e) => {
                           if (e.target.value) linkReel.mutate({ sessionId: s.id, reelId: e.target.value })
                         }}
-                        className="flex-1 rounded-md border border-neutral-300 p-1.5 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+                        className="flex-1 py-1.5 text-xs"
                       >
                         <option value="" disabled>
                           {reels.isLoading ? 'Loading reels…' : 'Pick the reel you posted'}
@@ -407,11 +382,11 @@ export function StudioPage() {
                               '…'}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                       <button
                         type="button"
                         onClick={() => setLinkingSessionId(null)}
-                        className="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+                        className="text-xs text-white/40 hover:text-white/70"
                       >
                         Cancel
                       </button>
@@ -420,16 +395,16 @@ export function StudioPage() {
                     <button
                       type="button"
                       onClick={() => setLinkingSessionId(s.id)}
-                      className="text-xs text-purple-700 underline hover:text-purple-900 dark:text-purple-300 dark:hover:text-purple-100"
+                      className="text-xs text-accent-300 underline hover:text-accent-200"
                     >
                       Mark as posted →
                     </button>
                   )}
                   {linkReel.isError && linkingSessionId === s.id && (
-                    <span className="text-xs text-red-600">{(linkReel.error as Error).message}</span>
+                    <span className="text-xs text-red-400">{(linkReel.error as Error).message}</span>
                   )}
                 </div>
-              </div>
+              </Card>
             )
           })}
         </div>

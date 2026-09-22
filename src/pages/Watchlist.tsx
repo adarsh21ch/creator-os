@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Badge, Button, Card, Input, PageHeader, Select } from '../components/ui/primitives'
 import type { WatchlistAccount, WatchlistPost } from '../types'
 
 function AccountPosts({ accountId }: { accountId: string }) {
@@ -18,35 +19,35 @@ function AccountPosts({ accountId }: { accountId: string }) {
     },
   })
 
-  if (posts.isLoading) return <p className="mt-2 text-xs text-neutral-500">Loading posts…</p>
-  if (posts.isError) return <p className="mt-2 text-xs text-red-600">{(posts.error as Error).message}</p>
+  if (posts.isLoading) return <p className="mt-2 text-xs text-white/40">Loading posts…</p>
+  if (posts.isError) return <p className="mt-2 text-xs text-red-400">{(posts.error as Error).message}</p>
   if (!posts.data || posts.data.length === 0) {
     return (
-      <p className="mt-2 text-xs text-neutral-500">
+      <p className="mt-2 text-xs text-white/30">
         Nothing scraped yet — the daily Influencer Watch run fills this in, or log a link above.
       </p>
     )
   }
 
   return (
-    <ul className="mt-2 space-y-1">
+    <ul className="mt-2 space-y-1.5">
       {posts.data.map((p) => (
         <li key={p.id} className="flex items-center justify-between gap-2 text-xs">
           <a
             href={p.post_url}
             target="_blank"
             rel="noreferrer"
-            className="truncate text-neutral-600 hover:underline dark:text-neutral-400"
+            className="truncate text-white/50 hover:text-white/80 hover:underline"
           >
             {p.posted_at ?? 'no date'} — {p.caption?.slice(0, 50) ?? p.post_url}
           </a>
-          <span className="shrink-0 flex items-center gap-1">
+          <span className="flex shrink-0 items-center gap-1">
             {p.is_outlier && (
-              <span className="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+              <Badge variant="warning">
                 {p.outlier_ratio ? `${p.outlier_ratio.toFixed(1)}×` : 'outlier'}
-              </span>
+              </Badge>
             )}
-            <span className="text-neutral-500">{p.views != null ? `${p.views.toLocaleString()} views` : '—'}</span>
+            <span className="text-white/30">{p.views != null ? `${p.views.toLocaleString()} views` : '—'}</span>
           </span>
         </li>
       ))}
@@ -83,20 +84,16 @@ function IngestPostForm({ accountId }: { accountId: string }) {
       }}
       className="mt-1 flex gap-2"
     >
-      <input
+      <Input
         placeholder="Paste their reel link to log it"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
-        className="flex-1 rounded-md border border-neutral-300 p-1.5 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+        className="flex-1 py-1.5 text-xs"
       />
-      <button
-        type="submit"
-        disabled={ingest.isPending}
-        className="rounded-md border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
-      >
+      <Button type="submit" variant="secondary" disabled={ingest.isPending} className="px-2 py-1 text-xs">
         {ingest.isPending ? '…' : 'Log'}
-      </button>
-      {status && <span className="self-center text-xs text-neutral-500">{status}</span>}
+      </Button>
+      {status && <span className="self-center text-xs text-white/40">{status}</span>}
     </form>
   )
 }
@@ -145,12 +142,10 @@ export function WatchlistPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-xl font-semibold">Watchlist</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        40 accounts, tagged right / left / neutral. The Influencer Watch desk logs every new post
-        against this list — outliers are ~3× that account's own 30-day median, never an absolute
-        threshold.
-      </p>
+      <PageHeader
+        title="Watchlist"
+        description="40 accounts, tagged right / left / neutral. The Influencer Watch desk logs every new post against this list — outliers are ~3× that account's own 30-day median, never an absolute threshold."
+      />
 
       <form
         onSubmit={(e) => {
@@ -159,52 +154,39 @@ export function WatchlistPage() {
         }}
         className="mt-6 flex gap-2"
       >
-        <input
-          placeholder="@handle"
-          value={handle}
-          onChange={(e) => setHandle(e.target.value)}
-          className="flex-1 rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-        />
-        <select
-          value={wing}
-          onChange={(e) => setWing(e.target.value as 'right' | 'left' | 'neutral')}
-          className="rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-        >
+        <Input placeholder="@handle" value={handle} onChange={(e) => setHandle(e.target.value)} className="flex-1" />
+        <Select value={wing} onChange={(e) => setWing(e.target.value as 'right' | 'left' | 'neutral')}>
           <option value="right">Right</option>
           <option value="left">Left</option>
           <option value="neutral">Neutral</option>
-        </select>
-        <button
-          type="submit"
-          disabled={addAccount.isPending}
-          className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-        >
+        </Select>
+        <Button type="submit" disabled={addAccount.isPending}>
           Add
-        </button>
+        </Button>
       </form>
 
-      {isLoading && <p className="mt-4 text-sm text-neutral-500">Loading…</p>}
+      {isLoading && <p className="mt-4 text-sm text-white/40">Loading…</p>}
       {accounts && accounts.length === 0 && (
-        <p className="mt-4 text-sm text-neutral-500">No accounts yet.</p>
+        <p className="mt-4 text-sm text-white/40">No accounts yet.</p>
       )}
       {accounts && accounts.length > 0 && (
-        <ul className="mt-6 divide-y divide-neutral-100 rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
+        <Card className="mt-6 divide-y divide-border-subtle overflow-hidden">
           {accounts.map((acc) => (
-            <li key={acc.id} className="p-3 text-sm">
+            <div key={acc.id} className="p-3.5 text-sm">
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => setExpanded(expanded === acc.id ? null : acc.id)}
                   className="text-left"
                 >
-                  <span className="font-medium">@{acc.handle}</span>{' '}
-                  <span className="text-xs text-neutral-500">{acc.wing}</span>
+                  <span className="font-medium text-white">@{acc.handle}</span>{' '}
+                  <span className="text-xs text-white/40">{acc.wing}</span>
                 </button>
                 <button
                   onClick={() => toggleActive.mutate(acc)}
-                  className={`rounded px-2 py-1 text-xs ${
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                     acc.active
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                      : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-900'
+                      ? 'border border-emerald-500/25 bg-emerald-500/15 text-emerald-300'
+                      : 'border border-white/10 bg-white/5 text-white/40'
                   }`}
                 >
                   {acc.active ? 'Active' : 'Paused'}
@@ -216,9 +198,9 @@ export function WatchlistPage() {
                   <AccountPosts accountId={acc.id} />
                 </>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+        </Card>
       )}
     </div>
   )

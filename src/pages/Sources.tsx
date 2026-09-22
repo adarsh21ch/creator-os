@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Badge, Button, Card, Input, PageHeader, Select } from '../components/ui/primitives'
 import type { NewsStory, Source } from '../types'
 
 export function SourcesPage() {
@@ -48,11 +49,10 @@ export function SourcesPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-xl font-semibold">Sources</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        Newspapers and RSS feeds the News Desk Analyst reads nightly, kept to what is relevant to
-        his niche.
-      </p>
+      <PageHeader
+        title="Sources"
+        description="Newspapers and RSS feeds the News Desk Analyst reads nightly, kept to what is relevant to his niche."
+      />
 
       <form
         onSubmit={(e) => {
@@ -62,81 +62,65 @@ export function SourcesPage() {
         className="mt-6 space-y-2"
       >
         <div className="flex gap-2">
-          <input
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="flex-1 rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          />
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as 'rss' | 'newspaper' | 'other')}
-            className="rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          >
+          <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="flex-1" />
+          <Select value={type} onChange={(e) => setType(e.target.value as 'rss' | 'newspaper' | 'other')}>
             <option value="rss">RSS</option>
             <option value="newspaper">Newspaper</option>
             <option value="other">Other</option>
-          </select>
+          </Select>
         </div>
         <div className="flex gap-2">
-          <input
-            placeholder="https://…"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="flex-1 rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          />
-          <button
-            type="submit"
-            disabled={addSource.isPending}
-            className="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-          >
+          <Input placeholder="https://…" value={url} onChange={(e) => setUrl(e.target.value)} className="flex-1" />
+          <Button type="submit" disabled={addSource.isPending}>
             Add
-          </button>
+          </Button>
         </div>
       </form>
 
-      {isLoading && <p className="mt-4 text-sm text-neutral-500">Loading…</p>}
+      {isLoading && <p className="mt-4 text-sm text-white/40">Loading…</p>}
       {sources && sources.length === 0 && (
-        <p className="mt-4 text-sm text-neutral-500">No sources yet.</p>
+        <p className="mt-4 text-sm text-white/40">No sources yet.</p>
       )}
       {sources && sources.length > 0 && (
-        <ul className="mt-6 divide-y divide-neutral-100 rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
+        <Card className="mt-6 divide-y divide-border-subtle overflow-hidden">
           {sources.map((s) => (
-            <li key={s.id} className="flex items-center justify-between p-3 text-sm">
+            <div key={s.id} className="flex items-center justify-between p-3.5 text-sm">
               <div>
-                <div className="font-medium">{s.name}</div>
-                <div className="text-xs text-neutral-500">{s.url}</div>
+                <div className="font-medium text-white">{s.name}</div>
+                <div className="text-xs text-white/40">{s.url}</div>
               </div>
-              <span className="rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-500 dark:bg-neutral-900">
-                {s.type}
-              </span>
-            </li>
+              <Badge>{s.type}</Badge>
+            </div>
           ))}
-        </ul>
+        </Card>
       )}
 
-      <h2 className="mb-2 mt-10 text-sm font-semibold text-neutral-500">
+      <h2 className="mb-3 mt-10 text-sm font-semibold text-white/50">
         Latest headlines (pulled nightly at 2am)
       </h2>
       {stories && stories.length === 0 && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-white/40">
           Nothing pulled yet — the nightly job runs at 2am IST, or add a source above and check
           back tomorrow.
         </p>
       )}
       {stories && stories.length > 0 && (
-        <ul className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 text-sm dark:divide-neutral-800 dark:border-neutral-800">
+        <Card className="divide-y divide-border-subtle overflow-hidden text-sm">
           {stories.map((s) => (
-            <li key={s.id} className="p-3">
-              <a href={s.url} target="_blank" rel="noreferrer" className="font-medium hover:underline">
-                {s.title}
-              </a>
-              <div className="text-xs text-neutral-500">
+            <a
+              key={s.id}
+              href={s.url}
+              target="_blank"
+              rel="noreferrer"
+              className="block p-3.5 transition-colors hover:bg-white/[0.03]"
+            >
+              <span className="font-medium text-white hover:text-accent-300">{s.title}</span>
+              <div className="text-xs text-white/30">
                 {s.published_at ? new Date(s.published_at).toLocaleDateString() : '—'}
               </div>
-            </li>
+            </a>
           ))}
-        </ul>
+        </Card>
       )}
     </div>
   )

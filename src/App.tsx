@@ -38,7 +38,7 @@ function Gate() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-50 text-sm text-neutral-500 dark:bg-neutral-950">
+      <div className="flex min-h-screen items-center justify-center bg-canvas text-sm text-white/40">
         Loading…
       </div>
     )

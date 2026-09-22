@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { supabase, supabaseConfigured } from '../lib/supabase'
+import { Badge, Button, Card, Input, PageHeader } from '../components/ui/primitives'
 import type { AppSettingsRow } from '../types'
 
 export function SettingsPage() {
@@ -17,11 +18,10 @@ export function SettingsPage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-xl font-semibold">Settings</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        AI keys are saved here and read by the backend when it runs each employee — nothing to
-        deploy separately. They're stored behind the same login as everything else in this app.
-      </p>
+      <PageHeader
+        title="Settings"
+        description="AI keys are saved here and read by the backend when it runs each employee — nothing to deploy separately. They're stored behind the same login as everything else in this app."
+      />
 
       <div className="mt-6 space-y-3">
         <Row label="Supabase" ok={supabaseConfigured} okText="Connected" badText="Not configured" />
@@ -54,18 +54,10 @@ export function SettingsPage() {
 
 function Row({ label, ok, okText, badText }: { label: string; ok: boolean; okText: string; badText: string }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800">
-      <span className="font-medium">{label}</span>
-      <span
-        className={
-          ok
-            ? 'rounded bg-green-100 px-2 py-1 text-xs text-green-800 dark:bg-green-900/30 dark:text-green-300'
-            : 'rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-500 dark:bg-neutral-900'
-        }
-      >
-        {ok ? okText : badText}
-      </span>
-    </div>
+    <Card className="flex items-center justify-between p-3.5 text-sm">
+      <span className="font-medium text-white">{label}</span>
+      <Badge variant={ok ? 'success' : 'default'}>{ok ? okText : badText}</Badge>
+    </Card>
   )
 }
 
@@ -102,33 +94,23 @@ function KeyRow({
 
   if (!editing) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800">
-        <span className="font-medium">{label}</span>
+      <Card className="flex items-center justify-between p-3.5 text-sm">
+        <span className="font-medium text-white">{label}</span>
         <div className="flex items-center gap-2">
-          <span
-            className={
-              currentlySet
-                ? 'rounded bg-green-100 px-2 py-1 text-xs text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                : 'rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-500 dark:bg-neutral-900'
-            }
-          >
+          <Badge variant={currentlySet ? 'success' : 'default'}>
             {currentlySet ? 'Set' : `Not set — create at ${createUrl}`}
-          </span>
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
-          >
+          </Badge>
+          <Button variant="secondary" onClick={() => setEditing(true)} className="px-2 py-1 text-xs">
             {currentlySet ? 'Replace' : 'Add key'}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-800">
-      <div className="mb-2 font-medium">{label}</div>
+    <Card className="p-3.5 text-sm">
+      <div className="mb-2 font-medium text-white">{label}</div>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -136,35 +118,30 @@ function KeyRow({
         }}
         className="flex gap-2"
       >
-        <input
+        <Input
           type="password"
           autoComplete="off"
           placeholder="Paste key — never shown again after saving"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="flex-1 rounded-md border border-neutral-300 p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="flex-1"
         />
-        <button
-          type="submit"
-          disabled={save.isPending || !value.trim()}
-          className="rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={save.isPending || !value.trim()} className="text-xs">
           {save.isPending ? 'Saving…' : 'Save'}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="secondary"
           onClick={() => {
             setEditing(false)
             setValue('')
           }}
-          className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
+          className="text-xs"
         >
           Cancel
-        </button>
+        </Button>
       </form>
-      {save.isError && (
-        <p className="mt-2 text-xs text-red-600">{(save.error as Error).message}</p>
-      )}
-    </div>
+      {save.isError && <p className="mt-2 text-xs text-red-400">{(save.error as Error).message}</p>}
+    </Card>
   )
 }
