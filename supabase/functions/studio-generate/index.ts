@@ -17,7 +17,7 @@
 // always returned to the browser so he can check the sources himself before
 // he ever says a line on camera.
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { corsHeaders, json } from "../_shared/cors.ts";
+import { corsHeadersFor, json } from "../_shared/cors.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -38,7 +38,7 @@ function extractText(content: Array<{ type: string; text?: string }>): string {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeadersFor(req) });
 
   // Require a real signed-in user — the anon key alone must not be enough to
   // spend Adarsh's Anthropic credits. Verify the caller's own JWT first,
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
   });
   const { data: userData, error: authError } = await asCaller.auth.getUser();
   if (authError || !userData?.user) {
-    return json({ error: "Not signed in." }, 401);
+    return json(req, { error: "Not signed in." }, 401);
   }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
@@ -64,12 +64,12 @@ Deno.serve(async (req) => {
     .single();
   const apiKey = settings?.anthropic_api_key;
   if (!apiKey) {
-    return json({ error: "No Anthropic key saved. Add one in Settings first." }, 400);
+    return json(req, { error: "No Anthropic key saved. Add one in Settings first." }, 400);
   }
 
   const body = (await req.json()) as Body;
   if (!body.topic?.trim()) {
-    return json({ error: "topic is required" }, 400);
+    return json(req, { error: "topic is required" }, 400);
   }
 
   // --- Research: no Brand Brain, no voice — this is a fact-finding call only. ---
@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       }),
     });
     if (!anthropicRes.ok) {
-      return json({ error: `Anthropic error: ${await anthropicRes.text()}` }, 502);
+      return json(req, { error: `Anthropic error: ${await anthropicRes.text()}` }, 502);
     }
     const result = await anthropicRes.json();
     const text = extractText(result.content ?? []);
@@ -105,12 +105,12 @@ Deno.serve(async (req) => {
     // this is what Adarsh hit. Raised max_tokens (3 searches can burn a lot of
     // the budget before writing the answer) and now this fails loud instead.
     if (!text.trim()) {
-      return json(
+      return json(req, 
         { error: `Research produced no usable text (stop_reason: ${result.stop_reason}). Try a narrower topic, or try again.` },
         502,
       );
     }
-    return json({ text });
+    return json(req, { text });
   }
 
   // --- Hooks / Script: Brand Brain applies, and only the research's facts are allowed. ---
@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
     maxTokens = 1200;
   } else {
     if (!body.hook?.trim()) {
-      return json({ error: "hook is required for action=script" }, 400);
+      return json(req, { error: "hook is required for action=script" }, 400);
     }
     userPrompt =
       researchBlock +
@@ -186,16 +186,16 @@ Deno.serve(async (req) => {
 
   if (!anthropicRes.ok) {
     const errText = await anthropicRes.text();
-    return json({ error: `Anthropic error: ${errText}` }, 502);
+    return json(req, { error: `Anthropic error: ${errText}` }, 502);
   }
 
   const result = await anthropicRes.json();
   const text = extractText(result.content ?? []);
   if (!text.trim()) {
-    return json(
+    return json(req, 
       { error: `${body.action} produced no usable text (stop_reason: ${result.stop_reason}). Try again.` },
       502,
     );
   }
-  return json({ text });
+  return json(req, { text });
 });

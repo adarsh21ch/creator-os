@@ -6,6 +6,7 @@ import { LoginPage } from './pages/Login'
 import { BrandBrainPage } from './pages/BrandBrain'
 import { LaterPage } from './pages/Later'
 import { LibraryPage } from './pages/Library'
+import { NotFoundPage } from './pages/NotFound'
 import { SettingsPage } from './pages/Settings'
 import { SourcesPage } from './pages/Sources'
 import { StudioPage } from './pages/Studio'
@@ -52,6 +53,7 @@ function Gate() {
             <Route path="brand-brain" element={<BrandBrainPage />} />
             <Route path="employees" element={<LaterPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
       </Routes>
     </HashRouter>

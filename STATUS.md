@@ -191,6 +191,35 @@ instead of silently returning empty text.
 **Deployed 2026-09-20**, verified: `_shared/cors.ts` appeared in the deploy output alongside
 the function, confirming the CORS fix built correctly.
 
+## Production security audit — 2026-09-22, now that creator.nevorai.com is live
+
+1. **CONFIRMED, SEVERE, NOT YET FIXED: Supabase public sign-up is enabled** (`disable_signup: false`,
+   checked via the project's public `/auth/v1/settings` endpoint — read-only, created no user).
+   Because every RLS policy in this app is `for all to authenticated using (true)` — "authenticated
+   means Adarsh" — anyone who signs themselves up gets full read/write on every table. **This is a
+   dashboard-only setting, cannot be fixed via SQL or the CLI used so far.** Adarsh must go to the
+   Nevorai Tools Supabase project → Authentication → Sign In / Providers → Email, and turn OFF
+   "Allow new users to sign up." Until that happens, the "single-operator" trust model this entire
+   app's security is built on does not actually hold in production.
+2. **Fixed: CORS was wildcard (`*`), now locked to `https://creator.nevorai.com` and
+   `http://localhost:5173`** — `_shared/cors.ts` reworked to `corsHeadersFor(req)`, reflecting only
+   an allowed origin. Both edge functions updated to pass `req` through to every response.
+3. **Fixed: added a 404 route** (`src/pages/NotFound.tsx`) — the app had no catch-all before.
+4. **Confirmed clean: no secrets ever committed to git** (`.env` was never tracked), repo builds
+   from a clean clone, and the 14 commits sitting only-local got pushed to GitHub
+   (`github.com/adarsh21ch/creator-os`) for the first time this session — they existed only on
+   this laptop until now.
+5. **Not verified: Vercel environment variables.** The app clearly works in production (login and
+   pages render), which is decent evidence they're set correctly — but this was not independently
+   confirmed against the Vercel dashboard.
+6. **Blocked mid-audit: this machine's Supabase CLI is again authenticated as the wrong account**
+   (same class of issue as the original project-move day — some other session/project logged it
+   into a different Supabase account). `supabase projects list` no longer shows Nevorai Tools at
+   all. **The edge function CORS fix above is written and committed but could not be redeployed
+   in this session** — needs `supabase logout` + `supabase login` (the correct account) + confirm
+   `supabase link --project-ref wxgfaaaboftzsazknbvl` succeeds, then
+   `supabase functions deploy studio-generate` and `supabase functions deploy ingest-instagram`.
+
 ## Follow-up same day: Library AND Studio both hung with no error
 
 Right after redeploying, Library sat on "Loading…" and Studio's Research sat on "Searching the
