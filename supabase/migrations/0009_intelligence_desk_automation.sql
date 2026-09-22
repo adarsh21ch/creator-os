@@ -8,7 +8,7 @@
 set search_path to creator_os, public;
 
 -- Influencer Watch needs somewhere to record "this post is unusually big for
--- this account" — a flat view-count threshold is meaningless across accounts
+-- this account" - a flat view-count threshold is meaningless across accounts
 -- of very different sizes, so this is relative to the account's own 30-day
 -- median (matches the copy already on the Watchlist screen).
 alter table watchlist_posts
@@ -18,11 +18,11 @@ alter table watchlist_posts
 create index if not exists watchlist_posts_outlier_idx on watchlist_posts(is_outlier) where is_outlier;
 
 -- pg_cron + pg_net were already enabled in 0004. The project ref
--- (wxgfaaaboftzsazknbvl) is not secret and is filled in below — only the
+-- (wxgfaaaboftzsazknbvl) is not secret and is filled in below - only the
 -- service_role key is, and it appears in exactly ONE place in this file:
 -- the line right under "declare". Replace only the text between the quotes
 -- on that one line, run this in the SQL Editor, then never save or commit
--- the filled-in version anywhere — that key bypasses every RLS policy.
+-- the filled-in version anywhere - that key bypasses every RLS policy.
 
 do $$
 declare
@@ -44,7 +44,7 @@ begin
 
   perform cron.schedule(
     'creator-os-scrape-watchlist-daily',
-    '0 3 * * *', -- 03:00 UTC = 08:30 IST daily — after the news pull, ahead of his morning
+    '0 3 * * *', -- 03:00 UTC = 08:30 IST daily - after the news pull, ahead of his morning
     format(
       $sql$select net.http_post(
         url := 'https://wxgfaaaboftzsazknbvl.supabase.co/functions/v1/scrape-watchlist',
