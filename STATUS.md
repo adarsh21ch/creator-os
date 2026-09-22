@@ -212,13 +212,31 @@ the function, confirming the CORS fix built correctly.
 5. **Not verified: Vercel environment variables.** The app clearly works in production (login and
    pages render), which is decent evidence they're set correctly — but this was not independently
    confirmed against the Vercel dashboard.
-6. **Blocked mid-audit: this machine's Supabase CLI is again authenticated as the wrong account**
-   (same class of issue as the original project-move day — some other session/project logged it
-   into a different Supabase account). `supabase projects list` no longer shows Nevorai Tools at
-   all. **The edge function CORS fix above is written and committed but could not be redeployed
-   in this session** — needs `supabase logout` + `supabase login` (the correct account) + confirm
-   `supabase link --project-ref wxgfaaaboftzsazknbvl` succeeds, then
-   `supabase functions deploy studio-generate` and `supabase functions deploy ingest-instagram`.
+6. **Deployed and verified 2026-09-22.** `supabase projects list` showed the wrong account
+   moments earlier (some other project/session's login on this shared machine), but the per-repo
+   link survived it — both `supabase functions deploy studio-generate` and
+   `...deploy ingest-instagram` succeeded. Confirmed live with a real curl test: an OPTIONS
+   preflight from `creator.nevorai.com` gets that origin back; one pretending to be
+   `evil-example.com` gets the *production* origin back too (not its own) — which is exactly
+   correct, since the browser only permits the read when the header matches the page's own
+   origin, so an attacker origin can never pass regardless of what the server returns.
+7. **All 15 pending commits pushed to GitHub** (`372e971..af43554`) — 14 of mine plus this
+   hardening pass had been sitting local-only on this laptop until now. Should trigger Vercel's
+   auto-deploy if the project is connected to this repo (very likely, since creator.nevorai.com
+   was already serving the pre-push code from an earlier deploy).
+
+## Only one item left from this audit, and it needs Adarsh directly
+
+**Disable public sign-up** — Nevorai Tools Supabase project → Authentication → Sign In /
+Providers → Email → turn off "Allow new users to sign up." Cannot be done via SQL, CLI, or
+anything scriptable found so far; it's a dashboard-only toggle. This is the highest-priority
+open item in the whole project — every RLS policy here assumes "authenticated = Adarsh," and
+that assumption is false while this stays on.
+
+**Worth a quick independent check, lower priority:** confirm Vercel's project settings have
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` set to the Nevorai Tools values. The live site
+working is decent evidence they're already correct, but this was not independently confirmed
+against the Vercel dashboard.
 
 ## Follow-up same day: Library AND Studio both hung with no error
 
