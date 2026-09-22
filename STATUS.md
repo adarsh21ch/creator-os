@@ -425,6 +425,29 @@ explicitly over "Manager edits directly" and "just a feedback log."
 **Not run yet:** `0011_manager_chat.sql`. Until then the Manager screen loads but has no
 conversation history table to write to.
 
+## Full UI/UX redesign -- BUILT 2026-09-22
+
+Requested: "premium aesthetic... upgrade the whole website dashboard UI UX." Every one of the 15
+screens converted from plain light/dark-toggle Tailwind defaults to a single deliberate dark
+theme with a real design system.
+
+- **`src/index.css`**: new `@theme` tokens -- an `accent` violet scale (50-950), near-black
+  `canvas`/`surface`/`surface-raised` colors, `border`/`border-subtle`, `Inter` + `Lexend` fonts
+  (Google Fonts, loaded in `index.html`), `shadow-card`/`shadow-glow`.
+- **`src/components/ui/primitives.tsx`** (new): `Card`, `Button` (primary/secondary/ghost/danger),
+  `Badge` (default/accent/success/warning/danger), `PageHeader`, `EmptyState`, `Input`/`Textarea`/
+  `Select`, `FieldLabel`, `StatTile`, `Spinner`. Every screen now imports from here instead of
+  hand-styling its own markup -- **any future screen should use these too, not raw Tailwind
+  neutral/purple classes.**
+- Sidebar (`Layout.tsx`) redesigned: gradient logo mark, grouped nav with accent-dot active
+  states, avatar-initial + status footer.
+- All 15 screens converted, zero business-logic changes -- pure presentation layer. Verified with
+  a full `grep -rl "neutral-\|purple-600\|dark:"` sweep (zero hits left) plus a clean
+  `bun run build` + `bun run lint` pass.
+- No new npm dependencies -- no icon library added (deliberately: no way to visually verify
+  hand-authored SVG icons render correctly without a browser preview this session, so the design
+  leans on color/typography/spacing instead of icons for the premium feel).
+
 ## Blocked on Adarsh
 
 1. **3–5 more ORGANIC losers.** The validation step for F-01 and F-02. Organic only — promoted
