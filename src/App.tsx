@@ -11,6 +11,7 @@ import { FormatsPage } from './pages/Formats'
 import { IdeasPage } from './pages/Ideas'
 import { LaterPage } from './pages/Later'
 import { LibraryPage } from './pages/Library'
+import { ManagerPage } from './pages/Manager'
 import { NotFoundPage } from './pages/NotFound'
 import { SettingsPage } from './pages/Settings'
 import { SourcesPage } from './pages/Sources'
@@ -50,6 +51,7 @@ function Gate() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<TodayPage />} />
+            <Route path="manager" element={<ManagerPage />} />
             <Route path="ideas" element={<IdeasPage />} />
             <Route path="studio" element={<StudioPage />} />
             <Route path="board" element={<BoardPage />} />

@@ -126,6 +126,26 @@ export type StudioSession = {
   updated_at: string
 }
 
+export type ManagerMessage = {
+  id: string
+  role: 'user' | 'manager'
+  content: string
+  created_at: string
+}
+
+export type ManagerProposal = {
+  id: string
+  message_id: string | null
+  employee_id: string
+  field: 'prompt' | 'model' | 'schedule' | 'enabled'
+  old_value: string | null
+  new_value: string
+  rationale: string | null
+  status: 'pending' | 'applied' | 'rejected'
+  created_at: string
+  employees: { code: string; name: string } | null
+}
+
 export type Idea = {
   id: string
   topic: string

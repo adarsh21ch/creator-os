@@ -400,6 +400,31 @@ Employees shows "no employees yet," Ideas has nothing to read for C-01's context
 Watchlist/Sources already produced, and Studio's Hook Writer/Scriptwriter keep using their
 hardcoded fallback text (harmless -- same output as before, just not DB-editable yet).
 
+## Manager chat -- BUILT 2026-09-22
+
+Requested: "one particular manager to talk and say this team is not working correctly... update
+this thing." M-00 Chief of Staff is now a real screen, not just a disabled employee row.
+
+Deliberately **propose-only, never auto-apply** -- an AI editing its own operating instructions
+without a human checking first is a real risk, not a hypothetical one. Adarsh chose this
+explicitly over "Manager edits directly" and "just a feedback log."
+
+- **Migration `0011_manager_chat.sql`**: `manager_messages` (one running conversation, not
+  per-topic like Studio -- so the Manager can see feedback trends over time) and
+  `manager_proposals` (employee_id, field, old_value, new_value, rationale, status). Flips
+  M-00's `enabled` to true.
+- **`manager-chat` edge function**: gives Claude the full current employee roster as context plus
+  a `propose_employee_change` tool. When Adarsh gives clear feedback on a named employee, it
+  drafts ONE specific change with a one-line rationale -- never applies it. General chat/questions
+  just get a text reply, no tool call.
+- **Manager screen**: chat thread + a "Pending your approval" section above it showing any open
+  proposals with old value → new value and Apply/Reject buttons. Apply writes straight to the
+  `employees` row (same RLS already in place); Reject just marks the proposal dismissed.
+- Deployed and confirmed via `bun run build` + `bun run lint` (zero errors).
+
+**Not run yet:** `0011_manager_chat.sql`. Until then the Manager screen loads but has no
+conversation history table to write to.
+
 ## Blocked on Adarsh
 
 1. **3–5 more ORGANIC losers.** The validation step for F-01 and F-02. Organic only — promoted

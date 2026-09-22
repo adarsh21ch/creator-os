@@ -9,6 +9,7 @@ const groups: NavGroup[] = [
   {
     title: 'Daily',
     items: [
+      { to: '/manager', label: 'Manager', phase1: true },
       { to: '/', label: 'Today', phase1: true },
       { to: '/ideas', label: 'Ideas', phase1: true },
       { to: '/studio', label: 'Studio', phase1: true },
