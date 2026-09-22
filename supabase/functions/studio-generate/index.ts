@@ -72,8 +72,19 @@ Deno.serve(async (req) => {
     return json(req, { error: "topic is required" }, 400);
   }
 
+  // Employees are database rows, not code files (CLAUDE.md's core rule) —
+  // read I-04/C-02/C-03's prompt + model from the employees table, falling
+  // back to the hardcoded text below only when a row's prompt is empty, so
+  // this keeps working even before 0010 is run or if a row gets cleared.
+  const { data: employeeRows } = await supabase
+    .from("employees")
+    .select("code, prompt, model")
+    .in("code", ["I-04", "C-02", "C-03"]);
+  const employeeByCode = new Map((employeeRows ?? []).map((e) => [e.code, e]));
+
   // --- Research: no Brand Brain, no voice — this is a fact-finding call only. ---
   if (body.action === "research") {
+    const researcher = employeeByCode.get("I-04");
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -82,13 +93,14 @@ Deno.serve(async (req) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-5",
+        model: researcher?.model || "claude-sonnet-5",
         max_tokens: 8000,
         // Search-and-summarize doesn't need deep reasoning — "low" effort is
         // both faster and cheaper here, and speed is what this call needed.
         output_config: { effort: "low" },
         tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
         system:
+          researcher?.prompt ||
           "You are a fact-checker. Search the web for real, verifiable facts about the topic " +
           "given. Return a plain numbered list. Every line must end with the source URL in " +
           "parentheses. Do not include anything you could not find a source for. If you find " +
@@ -147,7 +159,9 @@ Deno.serve(async (req) => {
 
   let userPrompt: string;
   let maxTokens: number;
+  let employeeCode: "C-02" | "C-03";
   if (body.action === "hooks") {
+    employeeCode = "C-02";
     userPrompt =
       researchBlock +
       `Topic: ${body.topic}\n\n` +
@@ -159,6 +173,7 @@ Deno.serve(async (req) => {
     if (!body.hook?.trim()) {
       return json(req, { error: "hook is required for action=script" }, 400);
     }
+    employeeCode = "C-03";
     userPrompt =
       researchBlock +
       `Topic: ${body.topic}\nChosen hook: ${body.hook}\n\n` +
@@ -168,6 +183,15 @@ Deno.serve(async (req) => {
     maxTokens = 2000;
   }
 
+  // The employee row's prompt is additional instruction from Adarsh, layered
+  // on top of the Brand Brain + anti-fabrication rule above — those two stay
+  // hardcoded on purpose so an admin-panel edit can never remove the safety
+  // rule, but tone/behaviour is his to tune without a deploy.
+  const employee = employeeByCode.get(employeeCode);
+  const fullSystemPrompt = employee?.prompt
+    ? `${systemPrompt}\n\nAdditional instructions for this employee (${employeeCode}):\n${employee.prompt}`
+    : systemPrompt;
+
   const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -176,10 +200,10 @@ Deno.serve(async (req) => {
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-5",
+      model: employee?.model || "claude-sonnet-5",
       max_tokens: maxTokens,
       output_config: { effort: "medium" },
-      system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
+      system: [{ type: "text", text: fullSystemPrompt, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: userPrompt }],
     }),
   });

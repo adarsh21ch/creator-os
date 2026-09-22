@@ -10,9 +10,9 @@ const groups: NavGroup[] = [
     title: 'Daily',
     items: [
       { to: '/', label: 'Today', phase1: true },
-      { to: '/ideas', label: 'Ideas', phase1: false },
+      { to: '/ideas', label: 'Ideas', phase1: true },
       { to: '/studio', label: 'Studio', phase1: true },
-      { to: '/board', label: 'Board', phase1: false },
+      { to: '/board', label: 'Board', phase1: true },
     ],
   },
   {
@@ -34,7 +34,7 @@ const groups: NavGroup[] = [
   {
     title: 'System',
     items: [
-      { to: '/employees', label: 'Employees', phase1: false },
+      { to: '/employees', label: 'Employees', phase1: true },
       { to: '/settings', label: 'Settings', phase1: true },
     ],
   },

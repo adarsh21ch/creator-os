@@ -368,6 +368,38 @@ confirmed, security blocker is closed.**
    dashboard. Until this is set, `scrape-watchlist` runs on schedule but returns a clean 400 each
    time — harmless, just an empty run in `cron.job_run_details`.
 
+## Employees, Ideas, Board -- BUILT 2026-09-22 ("go all in")
+
+All three remaining "later" tabs built in one pass. `employees` was empty since 0001 despite
+existing in the schema; Hook Writer and Scriptwriter prompts were hardcoded in `studio-generate`
+instead, which is exactly what CLAUDE.md's core architecture rule says not to do.
+
+- **Migration `0010_employees_ideas_board.sql`**: seeds all 13 employees + M-00 Manager as real
+  rows (matching `docs/01-architecture.md` exactly), `enabled` set honestly (true only where a
+  real call exists today: I-02, I-04, C-01, C-02, C-03). Adds the `ideas` table and
+  `studio_sessions.production_status`.
+- **`studio-generate` now reads I-04/C-02/C-03's prompt + model from the `employees` table**
+  instead of hardcoded strings -- the Brand Brain block and the anti-fabrication hard rule stay
+  hardcoded on purpose (an admin-panel edit can never remove the safety rule), but tone/instructions
+  layer on top from the DB. Falls back to the old hardcoded text if a row's prompt is empty.
+- **Employees screen**: grouped by desk, inline edit (name/prompt/provider/model/schedule),
+  enable/disable toggle, "Hire" a new one. All CRUD, no deploy needed to change any of it.
+- **Ideas screen + `generate-ideas` function (C-01 Topic Planner)**: reads Today's outlier posts
+  + news headlines + Brand Brain pillars, asks Claude for up to 5 ranked topics as strict JSON,
+  saves to `ideas`. "Use in Studio" marks it used and navigates to Studio with the topic
+  pre-filled (via router state) -- "Dismiss" marks it dismissed. Needs outlier posts or news
+  stories to exist first (empty Watchlist/Sources = nothing to work with yet).
+- **Board screen**: 5-column tracker (Scripted -> Shooting -> Editing -> Scheduled -> Posted)
+  over `studio_sessions` where a script exists. Move-forward/back buttons, no drag library --
+  simple and reliable over polish. Shows a "linked to Library" badge when `reel_id` is set.
+- Both edge functions deployed and confirmed via `bun run build` + `bun run lint` (zero errors,
+  only pre-existing warnings unrelated to this work).
+
+**Not run yet -- needs Adarsh:** `0010_employees_ideas_board.sql` in the SQL Editor. Until then,
+Employees shows "no employees yet," Ideas has nothing to read for C-01's context beyond whatever
+Watchlist/Sources already produced, and Studio's Hook Writer/Scriptwriter keep using their
+hardcoded fallback text (harmless -- same output as before, just not DB-editable yet).
+
 ## Blocked on Adarsh
 
 1. **3–5 more ORGANIC losers.** The validation step for F-01 and F-02. Organic only — promoted

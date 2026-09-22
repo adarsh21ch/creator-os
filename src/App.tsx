@@ -4,8 +4,11 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { Layout } from './components/Layout'
 import { AuthProvider, useAuth } from './lib/auth'
 import { LoginPage } from './pages/Login'
+import { BoardPage } from './pages/Board'
 import { BrandBrainPage } from './pages/BrandBrain'
+import { EmployeesPage } from './pages/Employees'
 import { FormatsPage } from './pages/Formats'
+import { IdeasPage } from './pages/Ideas'
 import { LaterPage } from './pages/Later'
 import { LibraryPage } from './pages/Library'
 import { NotFoundPage } from './pages/NotFound'
@@ -47,16 +50,16 @@ function Gate() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<TodayPage />} />
-            <Route path="ideas" element={<LaterPage />} />
+            <Route path="ideas" element={<IdeasPage />} />
             <Route path="studio" element={<StudioPage />} />
-            <Route path="board" element={<LaterPage />} />
+            <Route path="board" element={<BoardPage />} />
             <Route path="formats" element={<FormatsPage />} />
             <Route path="library" element={<LibraryPage />} />
             <Route path="performance" element={<LaterPage />} />
             <Route path="watchlist" element={<WatchlistPage />} />
             <Route path="sources" element={<SourcesPage />} />
             <Route path="brand-brain" element={<BrandBrainPage />} />
-            <Route path="employees" element={<LaterPage />} />
+            <Route path="employees" element={<EmployeesPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

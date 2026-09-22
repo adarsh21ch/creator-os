@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { Reel, StudioSession } from '../types'
 
@@ -36,9 +37,13 @@ function useElapsedSeconds(active: boolean): number {
 
 export function StudioPage() {
   const qc = useQueryClient()
+  const location = useLocation()
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [linkingSessionId, setLinkingSessionId] = useState<string | null>(null)
-  const [topic, setTopic] = useState('')
+  // Arrives from Ideas' "Use in Studio" button (navigate with router state) —
+  // read once on mount so picking a different idea later doesn't stomp on
+  // whatever the user has typed since.
+  const [topic, setTopic] = useState(() => (location.state as { topic?: string } | null)?.topic ?? '')
   const [hook, setHook] = useState('')
   const [researchText, setResearchText] = useState('')
   const [hooksText, setHooksText] = useState('')

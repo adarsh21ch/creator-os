@@ -121,6 +121,18 @@ export type StudioSession = {
   chosen_hook: string | null
   script_text: string | null
   reel_id: string | null
+  production_status: 'scripted' | 'shooting' | 'editing' | 'scheduled' | 'posted'
   created_at: string
   updated_at: string
+}
+
+export type Idea = {
+  id: string
+  topic: string
+  pillar: string | null
+  why_now: string | null
+  confidence: 'high' | 'medium' | 'low' | null
+  source: string | null
+  status: 'new' | 'used' | 'dismissed'
+  created_at: string
 }
